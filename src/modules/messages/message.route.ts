@@ -8,9 +8,9 @@ export const message = new Elysia({prefix: '/messages'})
         return res
     })
     .post("/", async(ctx) => {
-        const { body, status } = ctx
+        const { body, set } = ctx
         const res = await MessageController.addMessage(body)
-        status(201)
+        set.status = 201
         return res
     }, {
         body: MessageCreateModels
