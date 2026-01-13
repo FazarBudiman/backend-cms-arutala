@@ -1,7 +1,11 @@
 import { Elysia } from "elysia";
+import { message } from "./modules/messages/message.route";
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+export default new Elysia()
+  .get("/", () => "Hello Elysia")
+  .get("/about", () => "About Elysia")
+  .use(message);
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+// console.log(
+//   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+// );
