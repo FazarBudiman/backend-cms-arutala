@@ -2,7 +2,8 @@
   "name": "app",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
@@ -11,7 +12,12 @@
   },
   "devDependencies": {
     "@types/pg": "^8.16.0",
-    "bun-types": "latest"
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "bun-types": "latest",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4"
   },
   "module": "src/index.js"
 }
