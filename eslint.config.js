@@ -9,21 +9,21 @@ export default [
       parser: tsParser,
       parserOptions: {
         project: './tsconfig.json',
-        sourceType: 'module'
-      }
+        sourceType: 'module',
+      },
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      '@typescript-eslint': tseslint,
     },
     rules: {
       // TypeScript rules
       '@typescript-eslint/no-unused-vars': ['warn'],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
 
       // JS rules
       'no-console': 'off',
-      'no-undef': 'off'
-    }
+      'no-undef': 'off',
+    },
   },
-  prettier
+  prettier,
 ]

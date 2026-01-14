@@ -1,6 +1,5 @@
-import  {Pool}  from 'pg'
-
-
+import { Pool } from 'pg'
+const { SUPABASE_DB_URL } = process.env
 export const pool: Pool = new Pool({
-  connectionString: process.env.SUPABASE_DB_URL!
-});
+  connectionString: SUPABASE_DB_URL!,
+})

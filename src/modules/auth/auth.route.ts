@@ -1,37 +1,49 @@
 import { Elysia } from 'elysia'
-import { AuthCreateModels } from './auth.model'
 import { AuthController } from './auth.controller'
-import {cookie} from '@elysiajs/cookie'
-
-const { COOKIE_SECRET } = process.env
-
+import { jwtPlugin } from '../../plugins/jwt.plugin'
+import { RefreshTokenModel, SignInModel } from './auth.model'
 
 export const auth = (app: Elysia) =>
-    app.group('/auth', (app) =>
-        app
-            .use(cookie({
-                httpOnly: true,
-                signed: true,
-                secret: COOKIE_SECRET!
-            }))
-            .post(
-                '/sign-up',
-                async ({ body }) => {
-                    const res = await AuthController.addUserController(body)
-                    return res
-                },
-                {
-                    body: AuthCreateModels, 
-                }
-            )
-            .post(
-                '/sign-in',
-                async ({ body }) => {
-                    const res = await AuthController.signInController(body)
-                    return res
-                },
-                {
-                    body: AuthCreateModels, 
-                }
-            )
-    )
+  app.group('/auth', (app) =>
+    app
+      .use(jwtPlugin)
+      .post(
+        '/sign-in',
+        async ({ body, accessToken, refreshToken }) => {
+          const res = await AuthController.signInController(
+            body,
+            accessToken,
+            refreshToken
+          )
+          return res
+        },
+        {
+          body: SignInModel,
+        }
+      )
+
+      .post(
+        '/refresh',
+        async ({ body, accessToken, refreshToken }) => {
+          const res = AuthController.refreshController(
+            body,
+            accessToken,
+            refreshToken
+          )
+          return res
+        },
+        {
+          body: RefreshTokenModel,
+        }
+      )
+      .delete(
+        '/sign-out',
+        async ({ body }) => {
+          const res = await AuthController.signOutController(body)
+          return res
+        },
+        {
+          body: RefreshTokenModel,
+        }
+      )
+  )

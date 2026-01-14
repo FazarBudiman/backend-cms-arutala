@@ -1,20 +1,84 @@
-import { AuthCreateProps } from "./auth.model";
-import { AuthService } from "./auth.service";
+import { BadRequest } from '../../exceptions/client.error'
+import { Role } from '../../types/role.type'
+import { RefreshTokenProps, SignInProps } from './auth.model'
+import { AuthService } from './auth.service'
 
 export class AuthController {
-    static addUserController = async (payload: AuthCreateProps) => {
-        const user = await AuthService.signUp(payload)
-        return {
-            status: 'success',
-            data: user
-        }
+  static async signInController(
+    payload: SignInProps,
+    accessToken: {
+      sign: (payload: { user_id: string; user_role: Role }) => Promise<string>
+    },
+    refreshToken: {
+      sign: (payload: { user_id: string }) => Promise<string>
+    }
+  ) {
+    const user = await AuthService.verifyUserCredential(payload)
+
+    const access_token = await accessToken.sign({
+      user_id: user.users_id,
+      user_role: user.roles_name,
+    })
+
+    const refresh_token = await refreshToken.sign({
+      user_id: user.users_id,
+    })
+
+    await AuthService.saveRefreshToken(refresh_token)
+
+    return {
+      status: 'success',
+      message: 'Sign In Berhasil',
+      data: {
+        access_token,
+        refresh_token,
+      },
+    }
+  }
+
+  static async refreshController(
+    payload: RefreshTokenProps,
+    accessToken: {
+      sign: (payload: { user_id: string; user_role: Role }) => Promise<string>
+    },
+    refreshToken: {
+      verify: (token?: string) => Promise<any>
+    }
+  ) {
+    const { refresh_token } = payload
+
+    // 1. Verify refresh token JWT
+    const decoded = await refreshToken.verify(refresh_token)
+    if (!decoded) {
+      throw new BadRequest('Invalid refresh token')
     }
 
-    static signInController = async(payload: AuthCreateProps) => {
-        const user = await AuthService.SignIn(payload)
-        return {
-            status: 'success',
-            data: user
-        }
+    // 2. Check refresh token exists in DB
+    await AuthService.verifyRefreshTokenExist(refresh_token)
+
+    // 3. Issue new access token (reuse claims)
+    const newAccessToken = await accessToken.sign({
+      user_id: decoded.user_id,
+      user_role: decoded.user_role,
+    })
+
+    return {
+      status: 'success',
+      data: {
+        access_token: newAccessToken,
+      },
     }
+  }
+
+  static async signOutController(payload: RefreshTokenProps) {
+    const { refresh_token } = payload
+    await AuthService.verifyRefreshTokenExist(refresh_token)
+
+    await AuthService.deleteRefreshToken(refresh_token)
+
+    return {
+      status: 'Success',
+      message: 'Sign Out Berhasil',
+    }
+  }
 }
