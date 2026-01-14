@@ -1,7 +1,8 @@
 import { Elysia } from 'elysia'
-import { message } from './modules/messages/message.route'
+import { message } from './modules/message/message.route'
 import { auth } from './modules/auth/auth.route'
 import { HttpError } from './exceptions/Error'
+import { user } from './modules/user/user.route'
 
 const App = new Elysia()
   .onError(({ error, code, set }) => {
@@ -50,5 +51,6 @@ const App = new Elysia()
   .get('/', () => 'The King is Back')
   .use(auth)
   .use(message)
+  .use(user)
 
 export default App

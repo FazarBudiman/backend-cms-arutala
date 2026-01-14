@@ -77,7 +77,7 @@ export class AuthController {
     await AuthService.deleteRefreshToken(refresh_token)
 
     return {
-      status: 'Success',
+      status: 'success',
       message: 'Sign Out Berhasil',
     }
   }

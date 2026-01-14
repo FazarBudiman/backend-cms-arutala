@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
-import { MessageController } from './messages.controller'
-import { MessageCreateModels } from './messages.model'
+import { MessageController } from './message.controller'
+import { MessageCreateModels } from './message.model'
 import { requireAuth } from '../../guards/auth.guard'
 import { bearer } from '@elysiajs/bearer'
 
@@ -27,7 +27,7 @@ export const message = new Elysia().group('/messages', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['SUPER_ADMIN']),
+        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
       }
     )
 )
