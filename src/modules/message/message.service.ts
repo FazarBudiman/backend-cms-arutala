@@ -1,5 +1,5 @@
 import { pool } from '../../supabase/pool'
-import { MessageCreateProps } from './messages.model'
+import { MessageCreateProps } from './message.model'
 
 export class MessageService {
   static async fetchMessages() {
