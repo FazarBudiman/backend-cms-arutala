@@ -1,3 +1,4 @@
+import { upload } from '../../shared/services/upload'
 import { AuthUser } from '../../types/auth.type'
 import { ApiResponse } from '../../types/response.type'
 import { ResponseHelper } from '../../utils/responseHelper'
@@ -5,6 +6,15 @@ import { UserCreateProps } from './user.model'
 import { UserService } from './user.service'
 
 export class UserController {
+  static async uploadProfileUserController(
+    profile: File
+  ): Promise<ApiResponse> {
+    const urlProfile = await upload(profile, '/user')
+    return ResponseHelper.success('Upload profile user berhasil', {
+      urlProfile,
+    })
+  }
+
   static async addUserController(
     payload: UserCreateProps,
     userWhoCreated: AuthUser

@@ -6,17 +6,21 @@ import { MentorCreateProps } from './mentor.model'
 import { MentorService } from './mentor.service'
 
 export class MentorController {
-  static async uploadProfileController(profile: File): Promise<ApiResponse> {
+  static async uploadProfileMentorController(
+    profile: File
+  ): Promise<ApiResponse> {
     const urlProfile = await upload(profile, '/mentor')
 
-    return ResponseHelper.success('Upload profile mentor berhasil', urlProfile)
+    return ResponseHelper.success('Upload profile mentor berhasil', {
+      urlProfile,
+    })
   }
 
   static async addMentorController(
     payload: MentorCreateProps,
     user: AuthUser
   ): Promise<ApiResponse> {
-    const { mentors_id } = await MentorService.addMentor(payload, user.user_id)
+    const mentors_id = await MentorService.addMentor(payload, user.user_id)
 
     return ResponseHelper.created('Menambah mentor berhasil', mentors_id)
   }

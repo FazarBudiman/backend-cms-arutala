@@ -1,5 +1,16 @@
 import { Static, t } from 'elysia'
 
+export const UserUploadModel = t.Object({
+  profile: t.File({
+    type: ['image/jpeg', 'image/png', 'image/webp'],
+    maxSize: '5m', // Batasi maksimal 2MB
+    error:
+      'File harus berupa gambar (JPG, PNG, WEBP) dengan ukuran maksimal 5MB',
+  }),
+})
+
+export type UserUploadProps = Static<typeof UserUploadModel>
+
 export const UserRole = {
   ADMIN: 'ADMIN',
   SUPER_ADMIN: 'SUPER_ADMIN',

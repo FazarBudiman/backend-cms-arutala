@@ -1,5 +1,4 @@
 import { supabaseStorage } from '../../supabase/supabaseStorage'
-
 const { BUCKET_NAME } = process.env
 
 export const upload = async (file: File, folderName: string) => {
