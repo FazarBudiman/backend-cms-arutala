@@ -11,7 +11,9 @@ export const mentor = new Elysia().group('/mentors', (app) =>
     .post(
       '/upload',
       async ({ body }) => {
-        const res = await MentorController.uploadProfileController(body.profile)
+        const res = await MentorController.uploadProfileMentorController(
+          body.profile
+        )
         return res
       },
       {

@@ -4,7 +4,7 @@ import { auth } from './modules/auth/auth.route'
 import { HttpError } from './exceptions/Error'
 import { user } from './modules/user/user.route'
 import swagger from '@elysiajs/swagger'
-import cors from '@elysiajs/cors'
+import { cors } from '@elysiajs/cors'
 import { mentor } from './modules/mentor/mentor.route'
 
 const App = new Elysia()
