@@ -7,6 +7,7 @@ import swagger from '@elysiajs/swagger'
 import { cors } from '@elysiajs/cors'
 import { mentor } from './modules/mentor/mentor.route'
 import { mitra } from './modules/mitra/mitra.route'
+import { testimoni } from './modules/testimoni/testimoni.route'
 
 const App = new Elysia()
   .use(cors())
@@ -79,5 +80,6 @@ const App = new Elysia()
   .use(message)
   .use(mentor)
   .use(mitra)
+  .use(testimoni)
 
 export default App

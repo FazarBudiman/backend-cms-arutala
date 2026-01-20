@@ -9,7 +9,7 @@ export const MentorCreateModel = t.Object({
       'Nama mentor minimal 3 karakter dan tidak boleh mengandung karakter spesial/angka',
   }),
   jobTitle: t.String({
-    minLength: 2,
+    minLength: 1,
     maxLength: 50,
     error: 'Job title harus diisi (2-50 karakter)',
   }),
