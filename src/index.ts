@@ -24,6 +24,7 @@ const App = new Elysia()
           { name: 'Message', description: 'Message Endpoint' },
           { name: 'Mentor', description: 'Mentor Endpoint' },
           { name: 'Mitra', description: 'Mitra Endpoint' },
+          { name: 'Testimoni', description: 'Testimoni Endpoint' },
         ],
       },
     })

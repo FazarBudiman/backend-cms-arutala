@@ -20,8 +20,11 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
       },
       {
         beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
-
         body: TestimoniCreateModel,
+        detail: {
+          tags: ['Testimoni'],
+          summary: 'Create a New Testimoni',
+        },
       }
     )
     .get(
@@ -38,6 +41,10 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
             t.Union([t.Literal('siswa'), t.Literal('talent')])
           ),
         }),
+        detail: {
+          tags: ['Testimoni'],
+          summary: 'Get All Testimoni with Query Parameter',
+        },
       }
     )
     .put(
@@ -53,6 +60,10 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
       {
         beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
         body: TestimoniUpdateModel,
+        detail: {
+          tags: ['Testimoni'],
+          summary: 'Update Testimoni by Id',
+        },
       }
     )
     .delete(
@@ -65,6 +76,10 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
       },
       {
         beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        detail: {
+          tags: ['Testimoni'],
+          summary: 'Delete Testimoni by Id',
+        },
       }
     )
 )
