@@ -19,7 +19,7 @@ export const mentor = new Elysia().group('/mentors', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('CREATE_MENTOR'),
         body: MentorCreateModel,
         detail: {
           tags: ['Mentor'],
@@ -53,7 +53,7 @@ export const mentor = new Elysia().group('/mentors', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('UPDATE_MENTOR'),
         body: MentorUpdateModel,
         detail: {
           tags: ['Mentor'],
@@ -71,7 +71,7 @@ export const mentor = new Elysia().group('/mentors', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('DELETE_MENTOR'),
         detail: {
           tags: ['Mentor'],
           summary: 'Delete Mentor by Id',

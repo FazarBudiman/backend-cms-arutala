@@ -20,7 +20,7 @@ export const user = new Elysia().group('/users', (app) =>
       },
       {
         body: UserCreateModel,
-        beforeHandle: requireAuth(['SUPER_ADMIN']),
+        beforeHandle: requireAuth('CREATE_USER'),
         detail: {
           tags: ['User'],
           summary: 'Create a New User',
@@ -35,7 +35,7 @@ export const user = new Elysia().group('/users', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['SUPER_ADMIN']),
+        beforeHandle: requireAuth('READ_USER'),
         detail: {
           tags: ['User'],
           summary: 'Get All Users',
@@ -50,7 +50,7 @@ export const user = new Elysia().group('/users', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['SUPER_ADMIN']),
+        beforeHandle: requireAuth('DELETE_USER'),
         detail: {
           tags: ['User'],
           summary: 'Delete User by Id',

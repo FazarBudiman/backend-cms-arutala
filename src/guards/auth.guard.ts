@@ -1,9 +1,8 @@
-import { Role } from '../types/role.type'
-import { UnauthorizedError, ForbiddenError } from '../exceptions/auth.error'
-import { AccessTokenPayload } from '../types/jwt.type'
+import { ForbiddenError, UnauthorizedError } from '../exceptions/auth.error'
 import { AuthUser } from '../types/auth.type'
+import { AccessTokenPayload } from '../plugins/jwt/token.schema'
 
-export const requireAuth = (roles?: Role | Role[]) => async (ctx: any) => {
+export const requireAuth = (permission: string) => async (ctx: any) => {
   // Authentication
   const { bearer, accessToken, store } = ctx
   if (!bearer) {
@@ -18,19 +17,15 @@ export const requireAuth = (roles?: Role | Role[]) => async (ctx: any) => {
     throw new UnauthorizedError('Invalid or expired token')
   }
 
-  // Authorization
-  if (roles) {
-    const allowedRoles = Array.isArray(roles) ? roles : [roles]
-
-    if (!allowedRoles.includes(payload.user_role)) {
-      throw new ForbiddenError('Insufficient permissions')
-    }
+  if (!payload.user_permissions.includes(permission)) {
+    throw new ForbiddenError('Insufficient permissions')
   }
 
   // Set Context for User Authenticated
   const user: AuthUser = {
     user_id: payload.user_id,
     user_role: payload.user_role,
+    user_permissions: payload.user_permissions,
   }
 
   store.user = user

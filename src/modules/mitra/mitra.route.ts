@@ -19,7 +19,7 @@ export const mitra = new Elysia().group('/mitras', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('CREATE_MITRA'),
         body: MitraCreateModel,
         detail: {
           tags: ['Mitra'],
@@ -51,7 +51,7 @@ export const mitra = new Elysia().group('/mitras', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('UPDATE_MITRA'),
         body: MitraUpdateModel,
         detail: {
           tags: ['Mitra'],
@@ -66,7 +66,7 @@ export const mitra = new Elysia().group('/mitras', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('DELETE_MITRA'),
         detail: {
           tags: ['Mitra'],
           summary: 'Delete Mitra by Id',

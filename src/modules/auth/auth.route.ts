@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia'
 import { AuthController } from './auth.controller'
-import { jwtPlugin } from '../../plugins/jwt.plugin'
 import { RefreshTokenModel, SignInModel } from './auth.model'
+import { jwtPlugin } from '../../plugins/jwt/jwt.plugin'
 
 export const auth = (app: Elysia) =>
   app.group('/auth', (app) =>

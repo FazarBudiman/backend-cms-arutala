@@ -1,5 +1,6 @@
 import { jwt } from '@elysiajs/jwt'
 import { Elysia } from 'elysia'
+import { AccessTokenSchema } from './token.schema'
 
 const { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } = process.env
 
@@ -9,6 +10,7 @@ export const jwtPlugin = new Elysia()
       name: 'accessToken',
       secret: ACCESS_TOKEN_KEY!,
       exp: '60m',
+      schema: AccessTokenSchema,
     })
   )
   .use(

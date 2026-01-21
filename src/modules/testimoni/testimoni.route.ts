@@ -19,7 +19,7 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('CREATE_TESTIMONI'),
         body: TestimoniCreateModel,
         detail: {
           tags: ['Testimoni'],
@@ -58,7 +58,7 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('UPDATE_TESTIMONI'),
         body: TestimoniUpdateModel,
         detail: {
           tags: ['Testimoni'],
@@ -75,7 +75,7 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('DELETE_TESTIMONI'),
         detail: {
           tags: ['Testimoni'],
           summary: 'Delete Testimoni by Id',

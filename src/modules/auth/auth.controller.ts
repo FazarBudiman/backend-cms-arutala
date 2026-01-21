@@ -1,6 +1,6 @@
 import { BadRequest } from '../../exceptions/client.error'
+import { AccessTokenPayload } from '../../plugins/jwt/token.schema'
 import { ApiResponse } from '../../types/response.type'
-import { Role } from '../../types/role.type'
 import { ResponseHelper } from '../../utils/responseHelper'
 import { RefreshTokenProps, SignInProps } from './auth.model'
 import { AuthService } from './auth.service'
@@ -9,7 +9,7 @@ export class AuthController {
   static async signInController(
     payload: SignInProps,
     accessToken: {
-      sign: (payload: { user_id: string; user_role: Role }) => Promise<string>
+      sign: (payload: AccessTokenPayload) => Promise<string>
     },
     refreshToken: {
       sign: (payload: { user_id: string }) => Promise<string>
@@ -17,9 +17,12 @@ export class AuthController {
   ): Promise<ApiResponse> {
     const user = await AuthService.verifyUserCredential(payload)
 
+    const permission = await AuthService.getUserPermissions(user.role_name)
+
     const access_token = await accessToken.sign({
       user_id: user.user_id,
       user_role: user.role_name,
+      user_permissions: permission,
     })
 
     const refresh_token = await refreshToken.sign({
@@ -37,7 +40,7 @@ export class AuthController {
   static async refreshController(
     payload: RefreshTokenProps,
     accessToken: {
-      sign: (payload: { user_id: string; user_role: Role }) => Promise<string>
+      sign: (payload: AccessTokenPayload) => Promise<string>
     },
     refreshToken: {
       verify: (token?: string) => Promise<any>
@@ -58,6 +61,7 @@ export class AuthController {
     const newAccessToken = await accessToken.sign({
       user_id: decoded.user_id,
       user_role: decoded.user_role,
+      user_permissions: decoded.user_permissions,
     })
 
     return ResponseHelper.success('Memperbarui access token berhasil', {

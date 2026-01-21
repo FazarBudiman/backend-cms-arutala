@@ -32,7 +32,7 @@ export const message = new Elysia().group('/messages', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('READ_MESSAGE'),
         detail: {
           tags: ['Message'],
           summary: 'Get All Message',
@@ -51,7 +51,7 @@ export const message = new Elysia().group('/messages', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('UPDATE_MESSAGE'),
         body: MessageUpdateModel,
         detail: {
           tags: ['Message'],
@@ -69,7 +69,7 @@ export const message = new Elysia().group('/messages', (app) =>
         return res
       },
       {
-        beforeHandle: requireAuth(['ADMIN', 'SUPER_ADMIN']),
+        beforeHandle: requireAuth('DELETE_MESSAGE'),
         detail: {
           tags: ['Message'],
           summary: 'Delete Message by Id',
