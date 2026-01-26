@@ -1,12 +1,17 @@
 import { Static, t } from 'elysia'
 
-export const MentorCreateModel = t.Object({
-  mentorName: t.String({
+export const ContributorType = {
+  INTERNAL: 'INTERNAL',
+  EXTERNAL: 'EXTERNAL',
+}
+
+export const ContributorCreateModel = t.Object({
+  contributorName: t.String({
     minLength: 3,
     maxLength: 100,
     pattern: "^[a-zA-Z\\s.\\,']+$",
     error:
-      'Nama mentor minimal 3 karakter dan tidak boleh mengandung karakter spesial/angka',
+      'Nama contributor minimal 3 karakter dan tidak boleh mengandung karakter spesial/angka',
   }),
   jobTitle: t.String({
     minLength: 1,
@@ -40,18 +45,22 @@ export const MentorCreateModel = t.Object({
     error:
       'File harus berupa gambar (JPG, PNG, WEBP) dengan ukuran maksimal 5MB',
   }),
+  contributorType: t.Enum(ContributorType, {
+    error:
+      'Contributor Type tidak valid. Pastikan nilai merupakan INTERNAL untuk Mentor dan EXTERNAL untuk bukan Mentor',
+  }),
 })
 
-export type MentorCreateProps = Static<typeof MentorCreateModel>
+export type ContributorCreateProps = Static<typeof ContributorCreateModel>
 
-export const MentorUpdateModel = t.Object({
-  mentorName: t.Optional(
+export const ContributorUpdateModel = t.Object({
+  contributorName: t.Optional(
     t.String({
       minLength: 3,
       maxLength: 100,
       pattern: "^[a-zA-Z\\s.\\,']+$",
       error:
-        'Nama mentor minimal 3 karakter dan tidak boleh mengandung karakter spesial/angka',
+        'Nama contributor minimal 3 karakter dan tidak boleh mengandung karakter spesial/angka',
     })
   ),
   jobTitle: t.Optional(
@@ -93,6 +102,10 @@ export const MentorUpdateModel = t.Object({
         'File harus berupa gambar (JPG, PNG, WEBP) dengan ukuran maksimal 5MB',
     })
   ),
+  contributorType: t.Enum(ContributorType, {
+    error:
+      'Contributor Type tidak valid. Pastikan nilai merupakan INTERNAL untuk Mentor dan EXTERNAL untuk bukan Mentor',
+  }),
 })
 
-export type MentorUpdateProps = Static<typeof MentorUpdateModel>
+export type ContributorUpdateProps = Static<typeof ContributorUpdateModel>
