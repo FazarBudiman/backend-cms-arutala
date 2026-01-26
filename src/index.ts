@@ -5,9 +5,10 @@ import { HttpError } from './exceptions/Error'
 import { user } from './modules/user/user.route'
 import { swagger } from '@elysiajs/swagger'
 import { cors } from '@elysiajs/cors'
-import { mentor } from './modules/mentor/mentor.route'
 import { mitra } from './modules/mitra/mitra.route'
 import { testimoni } from './modules/testimoni/testimoni.route'
+import { courses } from './modules/courses/courses.index'
+import { contributor } from './modules/contributor/contributor.route'
 
 const App = new Elysia()
   .use(cors())
@@ -22,9 +23,10 @@ const App = new Elysia()
           { name: 'Auth', description: 'Authentication Endpoint' },
           { name: 'User', description: 'User Endpoint' },
           { name: 'Message', description: 'Message Endpoint' },
-          { name: 'Mentor', description: 'Mentor Endpoint' },
+          { name: 'Contributor', description: 'Contributor Endpoint' },
           { name: 'Mitra', description: 'Mitra Endpoint' },
           { name: 'Testimoni', description: 'Testimoni Endpoint' },
+          { name: 'Courses', description: 'Courses Endpoint' },
         ],
       },
     })
@@ -79,8 +81,10 @@ const App = new Elysia()
   .use(auth)
   .use(user)
   .use(message)
-  .use(mentor)
+  .use(contributor)
   .use(mitra)
   .use(testimoni)
+
+  .use(courses)
 
 export default App
