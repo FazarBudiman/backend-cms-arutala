@@ -1,24 +1,18 @@
-// import { CourseCreateProps } from './course.model'
+import { CourseCreateProps, CourseUpdateProps } from './course.model'
 import { ApiResponse } from '../../../types/response.type'
-// import { AuthUser } from '../../../types/auth.type'
-// import { upload } from '../../../shared/services/upload'
+import { AuthUser } from '../../../types/auth.type'
 import { ResponseHelper } from '../../../utils/responseHelper'
 import { QueryParamsCourseProps } from './course.model'
 import { CourseService } from './course.service'
 
 export class CourseController {
-  // static async addCourseController(
-  //   payload: CourseCreateProps,
-  //   user: AuthUser
-  // ): Promise<ApiResponse> {
-  //   const coursePosterUrl = await upload(payload.coursePoster, '/course')
-  //   const courseId = await CourseService.addCourse(
-  //     payload,
-  //     coursePosterUrl,
-  //     user.user_id
-  //   )
-  //   return ResponseHelper.created('Menambah course berhasil', courseId)
-  // }
+  static async addCourseController(
+    payload: CourseCreateProps,
+    user: AuthUser
+  ): Promise<ApiResponse> {
+    const course_id = await CourseService.addCourse(payload, user.user_id)
+    return ResponseHelper.created('Menambah course berhasil', { course_id })
+  }
 
   static async getAllCourseController(
     query: QueryParamsCourseProps
@@ -45,5 +39,25 @@ export class CourseController {
       'Mengambil data detail course berhasil',
       course
     )
+  }
+
+  static async updateCourseController(
+    payload: CourseUpdateProps,
+    courseId: string,
+    user: AuthUser
+  ): Promise<ApiResponse> {
+    await CourseService.verifyCourseisExist(courseId)
+    const { course_title } = await CourseService.updateCourse(
+      payload,
+      courseId,
+      user.user_id
+    )
+    return ResponseHelper.success(`Update course : ${course_title} berhasil`)
+  }
+
+  static async deleteCourseController(courseId: string): Promise<ApiResponse> {
+    await CourseService.verifyCourseisExist(courseId)
+    const { course_title } = await CourseService.deleteCourse(courseId)
+    return ResponseHelper.success(`Menghapus course: ${course_title} berhasil`)
   }
 }

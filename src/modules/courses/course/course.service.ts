@@ -1,42 +1,70 @@
+import { PoolClient } from 'pg'
 import {
   BadRequest,
   ResourceNotFoundError,
 } from '../../../exceptions/client.error'
 import { supabasePool } from '../../../supabase/supabasePool'
-import { QueryParamsCourseProps } from './course.model'
-// import { CourseCreateProps } from './course.model'
+import {
+  CourseBenefitsUpdateProps,
+  CourseMaterialsUpdateProps,
+  CourseUpdateProps,
+  QueryParamsCourseProps,
+} from './course.model'
+import { CourseCreateProps } from './course.model'
 
 export class CourseService {
-  // static async addCourse(
-  //   payload: CourseCreateProps,
-  //   coursePosterUrl: string,
-  //   userWhocreated: string
-  // ) {
-  //   const {
-  //     courseTitle,
-  //     courseDescription,
-  //     courseCategoryId,
-  //     courseFieldId,
-  //     courseInstructorId,
-  //     coursePrice,
-  //   } = payload
+  static async addCourse(payload: CourseCreateProps, userWhocreated: string) {
+    const client = await supabasePool.connect()
+    const {
+      courseTitle,
+      courseDescription,
+      courseCategoryId,
+      courseFieldId,
+      courseBenefits,
+      courseMaterials,
+    } = payload
+    try {
+      await client.query('BEGIN')
 
-  //   const { rows } = await supabasePool.query(
-  //     `INSERT INTO courses (course_title, course_description, course_category_id, course_field_id, course_instructor_id, course_status, course_poster_url, course_price, created_by)
-  //           VALUES ($1, $2, $3, $4, $5, 'DRAFT' , $6, $7, $8) RETURNING course_id`,
-  //     [
-  //       courseTitle,
-  //       courseDescription,
-  //       courseCategoryId,
-  //       courseFieldId,
-  //       courseInstructorId,
-  //       coursePosterUrl,
-  //       coursePrice,
-  //       userWhocreated,
-  //     ]
-  //   )
-  //   return rows[0]
-  // }
+      const { rows } = await client.query(
+        `INSERT INTO courses(course_title, course_description, category_id, field_id, created_by)
+          VALUES ($1, $2, $3, $4, $5) RETURNING course_id`,
+        [
+          courseTitle,
+          courseDescription,
+          courseCategoryId,
+          courseFieldId,
+          userWhocreated,
+        ]
+      )
+
+      const { course_id } = rows[0]
+
+      for (const benefit of courseBenefits) {
+        await client.query(
+          `INSERT INTO courses_course_benefits (ccb_course_id, ccb_benefit_id, ccb_order_num)
+            VALUES ($1, $2, $3)`,
+          [course_id, benefit.courseBenefitId, benefit.orderNum]
+        )
+      }
+
+      for (const material of courseMaterials) {
+        await client.query(
+          `INSERT INTO course_materials (course_material_course_id, course_material_title, course_material_description, course_material_order_num)
+            VALUES ($1, $2, $3, $4)`,
+          [course_id, material.title, material.description, material.orderNum]
+        )
+      }
+
+      await client.query('COMMIT')
+      return course_id
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
+  }
 
   static async verifyCourseisExist(courseId: string) {
     let result
@@ -130,7 +158,7 @@ export class CourseService {
       FROM courses c
       JOIN course_categories cc ON c.category_id = cc.course_category_id
       JOIN course_fields cf ON c.field_id = cf.course_field_id
-      WHERE c.is_deleted = false
+      WHERE c.is_deleted = false 
       ${whereClause}
       ORDER BY c.created_date DESC
       `,
@@ -287,5 +315,139 @@ export class CourseService {
       [courseId]
     )
     return rows
+  }
+
+  static async updateCourseMain(
+    client: PoolClient,
+    payload: CourseUpdateProps,
+    courseId: string,
+    userWhoUpdated: string
+  ) {
+    const fields: string[] = []
+    const values: any[] = []
+    let idx = 1
+
+    if (payload.courseTitle) {
+      fields.push(`course_title = $${idx++}`)
+      values.push(payload.courseTitle)
+    }
+    if (payload.courseDescription) {
+      fields.push(`course_description = $${idx++}`)
+      values.push(payload.courseDescription)
+    }
+    if (payload.courseCategoryId) {
+      fields.push(`category_id = $${idx++}`)
+      values.push(payload.courseCategoryId)
+    }
+    if (payload.courseFieldId) {
+      fields.push(`field_id = $${idx++}`)
+      values.push(payload.courseFieldId)
+    }
+
+    fields.push(`updated_by = $${idx++}`)
+    values.push(userWhoUpdated)
+
+    fields.push(`updated_date = NOW()`)
+
+    values.push(courseId)
+
+    const { rows } = await supabasePool.query(
+      `UPDATE courses SET ${fields.join(', ')}
+        WHERE course_id = $${idx} RETURNING course_title`,
+      values
+    )
+    return rows[0]
+  }
+
+  static async replaceCourseBenefits(
+    client: PoolClient,
+    courseId: string,
+    benefits: CourseBenefitsUpdateProps
+  ) {
+    await client.query(
+      `DELETE FROM courses_course_benefits WHERE ccb_course_id = $1`,
+      [courseId]
+    )
+
+    for (const b of benefits) {
+      await client.query(
+        `INSERT INTO courses_course_benefits(
+          ccb_course_id, ccb_benefit_id, ccb_order_num)
+        VALUES ($1, $2, $3)`,
+        [courseId, b.courseBenefitId, b.orderNum]
+      )
+    }
+  }
+
+  static async replaceCourseMaterials(
+    client: PoolClient,
+    courseId: string,
+    materials: CourseMaterialsUpdateProps
+  ) {
+    await client.query(
+      `DELETE FROM course_materials WHERE course_material_course_id = $1`,
+      [courseId]
+    )
+
+    for (const m of materials) {
+      await client.query(
+        `INSERT INTO course_materials (
+          course_material_course_id, course_material_title, 
+          course_material_description, course_material_order_num)
+        VALUES ($1, $2, $3, $4)`,
+        [courseId, m.title, m.description, m.orderNum]
+      )
+    }
+  }
+
+  static async updateCourse(
+    payload: CourseUpdateProps,
+    courseId: string,
+    userWhoUpdated: string
+  ) {
+    const client = await supabasePool.connect()
+
+    try {
+      await client.query('BEGIN')
+
+      const course_title = await CourseService.updateCourseMain(
+        client,
+        payload,
+        courseId,
+        userWhoUpdated
+      )
+
+      if (payload.courseBenefits) {
+        await CourseService.replaceCourseBenefits(
+          client,
+          courseId,
+          payload.courseBenefits
+        )
+      }
+
+      if (payload.courseMaterials) {
+        await this.replaceCourseMaterials(
+          client,
+          courseId,
+          payload.courseMaterials
+        )
+      }
+
+      await client.query('COMMIT')
+      return { course_title }
+    } catch (e) {
+      await client.query('ROLLBACK')
+      throw e
+    } finally {
+      client.release()
+    }
+  }
+
+  static async deleteCourse(courseId: string) {
+    const { rows } = await supabasePool.query(
+      `UPDATE courses SET is_deleted = TRUE WHERE course_id = $1 RETURNING course_title `,
+      [courseId]
+    )
+    return rows[0]
   }
 }

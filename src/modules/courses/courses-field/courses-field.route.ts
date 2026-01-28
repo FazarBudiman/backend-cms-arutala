@@ -13,7 +13,7 @@ export const courseField = new Elysia({ prefix: '/courses-field' })
     {
       detail: {
         tags: ['Courses'],
-        summary: 'Get Course Fields by Course Id',
+        summary: '[course-field] Get All Course Field',
       },
     }
   )

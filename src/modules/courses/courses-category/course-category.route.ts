@@ -14,7 +14,7 @@ export const courseCategory = new Elysia({ prefix: '/courses-category' })
     {
       detail: {
         tags: ['Courses'],
-        summary: 'Get Course Category by Course Id',
+        summary: '[course-category] Get All Course Category',
       },
     }
   )
