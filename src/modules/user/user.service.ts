@@ -3,12 +3,12 @@ import {
   ResourceNotFoundError,
 } from '../../exceptions/client.error'
 import { supabasePool } from '../../supabase/supabasePool'
-import { UserCreateProps } from './user.model'
 import * as bcrypt from 'bcrypt'
+import { UserProps } from './user.model'
 
 export class UserService {
   static async addUser(
-    payload: UserCreateProps,
+    payload: UserProps,
     roleId: string,
     userWhoCreated: string,
     urlProfile: string
@@ -44,49 +44,50 @@ export class UserService {
 
   static async verifyUsernameIsExisting(username: string): Promise<boolean> {
     const { rows } = await supabasePool.query(
-      `SELECT username FROM users WHERE username = $1`,
+      `SELECT 1 FROM users WHERE username = $1`,
       [username]
     )
 
-    if (rows.length > 0) {
+    if (rows.length === 1) {
       throw new BadRequest('Username already exists')
-    } else {
-      return true
     }
+    return rows[0]
   }
 
   static async getUsers() {
     const { rows } = await supabasePool.query(
       `SELECT 
-                u.user_id,
-                u.username,
-                u.user_profile_url,
-                r.role_name,
-                u.is_active
-            FROM users u
-            JOIN roles r ON u.user_role_id = r.role_id
-            WHERE is_deleted = false
-            `
+        u.user_id,u.username,
+        u.user_profile_url,r.role_name
+      FROM users u
+        JOIN roles r ON u.user_role_id = r.role_id
+      WHERE is_deleted = false`
     )
     return { rows }
   }
 
+  static async verifyUserIsExistById(userId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 1 FROM users WHERE user_id = $1 AND is_deleted = FALSE`,
+      [userId]
+    )
+    if (rows.length === 0) {
+      throw new ResourceNotFoundError('Resource user tidak ditemukan')
+    }
+  }
+
   static async getUserById(userId: string) {
-    let result
-    try {
-      result = await supabasePool.query(
-        `SELECT user_id FROM users WHERE user_id = $1 AND is_deleted = false`,
-        [userId]
-      )
-    } catch {
-      throw new BadRequest('Invalid user ID format')
-    }
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        u.user_id, u.username,
+        u.user_profile_url, r.role_name
+      FROM users u
+        JOIN roles r ON u.user_role_id = r.role_id
+      WHERE user_id = $1 AND is_deleted = FALSE`,
+      [userId]
+    )
 
-    if (result.rows.length < 1) {
-      throw new ResourceNotFoundError('User not found')
-    }
-
-    return result.rows[0]
+    return rows[0]
   }
 
   static async deleteUserById(userId: string) {

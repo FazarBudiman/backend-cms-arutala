@@ -2,8 +2,8 @@ import { bearer } from '@elysiajs/bearer'
 import { Elysia } from 'elysia'
 import { requireAuth } from '../../guards/auth.guard'
 import { assertAuth } from '../../utils/assertAuth'
-import { UserCreateModel } from './user.model'
 import { UserController } from './user.controller'
+import { ParamsUserModel, UserModel } from './user.model'
 
 export const user = new Elysia().group('/users', (app) =>
   app
@@ -19,7 +19,7 @@ export const user = new Elysia().group('/users', (app) =>
         return res
       },
       {
-        body: UserCreateModel,
+        body: UserModel,
         beforeHandle: requireAuth('CREATE_USER'),
         detail: {
           tags: ['User'],
@@ -43,14 +43,31 @@ export const user = new Elysia().group('/users', (app) =>
       }
     )
 
+    .get(
+      '/:userId',
+      async ({ params }) => {
+        const res = await UserController.getUserByIdController(params)
+        return res
+      },
+      {
+        beforeHandle: requireAuth('READ_USER'),
+        params: ParamsUserModel,
+        detail: {
+          tags: ['User'],
+          summary: 'Get User by Id',
+        },
+      }
+    )
+
     .delete(
       '/:userId',
       async ({ params }) => {
-        const res = await UserController.deleteUserController(params.userId)
+        const res = await UserController.deleteUserController(params)
         return res
       },
       {
         beforeHandle: requireAuth('DELETE_USER'),
+        params: ParamsUserModel,
         detail: {
           tags: ['User'],
           summary: 'Delete User by Id',

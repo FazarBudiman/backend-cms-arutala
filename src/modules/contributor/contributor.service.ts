@@ -1,15 +1,15 @@
-import {
-  BadRequest,
-  ResourceNotFoundError,
-} from '../../exceptions/client.error'
+import { ResourceNotFoundError } from '../../exceptions/client.error'
 import { supabasePool } from '../../supabase/supabasePool'
-import { ContributorCreateProps } from './contributor.model'
+import {
+  ContributorProps,
+  QueryContributorTypeProps,
+} from './contributor.model'
 
 export class ContributorService {
   static async addContributor(
-    payload: ContributorCreateProps,
-    userWhoCreated: string,
-    urlProfile: string
+    payload: ContributorProps,
+    urlProfile: string,
+    userWhoCreated: string
   ) {
     const {
       contributorName,
@@ -34,39 +34,54 @@ export class ContributorService {
     return rows[0]
   }
 
-  static async getAllContributor(type?: 'internal' | 'external') {
-    let query = `SELECT contributor_id, contributor_name, contributor_job_title, contributor_company_name, contributor_expertise, contributor_profile_url 
-        FROM contributors WHERE is_deleted = FALSE`
-    const params: any[] = []
+  static async getAllContributor(query: QueryContributorTypeProps) {
+    const conditions: string[] = ['is_deleted = FALSE']
+    const values: any[] = []
+    let idx = 1
+
+    const { type } = query
 
     if (type) {
-      query += ` AND contributor_type = $1`
-      params.push(type.toUpperCase())
+      conditions.push(`contributor_type = $${idx++}`)
+      values.push(type.toUpperCase())
     }
-    const { rows } = await supabasePool.query(query, params)
+
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        contributor_id, contributor_name, contributor_job_title, 
+        contributor_company_name, contributor_expertise, contributor_profile_url 
+      FROM contributors 
+      WHERE ${conditions.join(' AND ')}`,
+      values
+    )
     return rows
   }
 
-  static async getContributorById(contributorId: string) {
-    let result
-    try {
-      result = await supabasePool.query(
-        `SELECT contributor_id FROM contributors WHERE contributor_id = $1 AND is_deleted = FALSE`,
-        [contributorId]
-      )
-    } catch {
-      throw new BadRequest('Invalid contributor_id format')
+  static async verifyContributorIsExist(contributorId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 1 FROM contributors WHERE contributor_id = $1 AND is_deleted = FALSE`,
+      [contributorId]
+    )
+    if (rows.length === 0) {
+      throw new ResourceNotFoundError('Resource contributor tidak ditemukan')
     }
+  }
 
-    if (result.rows.length < 1) {
-      throw new ResourceNotFoundError('Resource contributor not found')
-    }
-    return result.rows[0]
+  static async getContributorById(contributorId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        contributor_id, contributor_name, contributor_job_title, 
+        contributor_company_name, contributor_expertise, contributor_profile_url 
+      FROM contributors
+      WHERE contributor_id = $1 AND is_deleted = FALSE`,
+      [contributorId]
+    )
+    return rows[0]
   }
 
   static async updateContributor(
     contributorId: string,
-    payload: Partial<ContributorCreateProps>,
+    payload: Partial<ContributorProps>,
     profileUrl: string | null,
     userWhoUpdated: string
   ) {

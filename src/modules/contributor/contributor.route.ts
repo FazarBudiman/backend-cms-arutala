@@ -3,8 +3,9 @@ import { requireAuth } from '../../guards/auth.guard'
 import { bearer } from '@elysiajs/bearer'
 import { assertAuth } from '../../utils/assertAuth'
 import {
-  ContributorCreateModel,
-  ContributorUpdateModel,
+  ContributorModel,
+  ParamsContributorModel,
+  QueryContributorTypeModel,
 } from './contributor.model'
 import { ContributorController } from './contributor.controller'
 
@@ -23,7 +24,7 @@ export const contributor = new Elysia().group('/contributors', (app) =>
       },
       {
         beforeHandle: requireAuth('CREATE_CONTRIBUTOR'),
-        body: ContributorCreateModel,
+        body: ContributorModel,
         detail: {
           tags: ['Contributor'],
           summary: 'Create a New Contributor',
@@ -34,17 +35,12 @@ export const contributor = new Elysia().group('/contributors', (app) =>
     .get(
       '/',
       async ({ query }) => {
-        const { type } = query
         const res =
-          await ContributorController.getAllContributorController(type)
+          await ContributorController.getAllContributorController(query)
         return res
       },
       {
-        query: t.Object({
-          type: t.Optional(
-            t.Union([t.Literal('internal'), t.Literal('external')])
-          ),
-        }),
+        query: QueryContributorTypeModel,
         detail: {
           tags: ['Contributor'],
           summary: 'Get All Contributors',
@@ -52,11 +48,28 @@ export const contributor = new Elysia().group('/contributors', (app) =>
       }
     )
 
-    .put(
+    .get(
+      '/:contributorId',
+      async ({ params }) => {
+        const res =
+          await ContributorController.getContributorByIdController(params)
+        return res
+      },
+      {
+        beforeHandle: requireAuth('READ_CONTRIBUTOR'),
+        params: ParamsContributorModel,
+        detail: {
+          tags: ['Contributor'],
+          summary: 'Get Contributor by Id',
+        },
+      }
+    )
+
+    .patch(
       '/:contributorId',
       async ({ body, store, params }) => {
         const res = await ContributorController.updateContributorController(
-          params.contributorId,
+          params,
           body,
           assertAuth(store)
         )
@@ -64,7 +77,8 @@ export const contributor = new Elysia().group('/contributors', (app) =>
       },
       {
         beforeHandle: requireAuth('UPDATE_CONTRIBUTOR'),
-        body: ContributorUpdateModel,
+        body: t.Partial(ContributorModel),
+        params: ParamsContributorModel,
         detail: {
           tags: ['Contributor'],
           summary: 'Update Contributor by Id',
@@ -75,13 +89,13 @@ export const contributor = new Elysia().group('/contributors', (app) =>
     .delete(
       '/:contributorId',
       async ({ params }) => {
-        const res = await ContributorController.deleteContributorController(
-          params.contributorId
-        )
+        const res =
+          await ContributorController.deleteContributorController(params)
         return res
       },
       {
         beforeHandle: requireAuth('DELETE_CONTRIBUTOR'),
+        params: ParamsContributorModel,
         detail: {
           tags: ['Contributor'],
           summary: 'Delete Contributor by Id',

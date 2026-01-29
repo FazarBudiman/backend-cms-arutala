@@ -1,20 +1,19 @@
-import {
-  BadRequest,
-  ResourceNotFoundError,
-} from '../../exceptions/client.error'
+import { ResourceNotFoundError } from '../../exceptions/client.error'
 import { supabasePool } from '../../supabase/supabasePool'
-import { MitraCreateProps, MitraUpdateProps } from './mitra.model'
+import { MitraProps } from './mitra.model'
 
 export class MitraService {
   static async addMitra(
-    payload: MitraCreateProps,
+    payload: MitraProps,
     urlLogo: string,
     userWhoCreated: string
   ) {
     const { mitraName, businessField } = payload
     const { rows } = await supabasePool.query(
-      `INSERT INTO mitras (mitra_name, business_field, mitra_logo_url, created_by, created_date)
-                VALUES ($1, $2, $3, $4, NOW()) RETURNING mitra_id`,
+      `INSERT INTO mitras (
+        mitra_name, business_field, mitra_logo_url, 
+        created_by, created_date)
+      VALUES ($1, $2, $3, $4, NOW()) RETURNING mitra_id`,
       [mitraName, businessField, urlLogo, userWhoCreated]
     )
 
@@ -23,31 +22,39 @@ export class MitraService {
 
   static async getAllMitra() {
     const { rows } = await supabasePool.query(
-      `SELECT mitra_name, business_field, mitra_logo_url FROM mitras WHERE is_deleted = false`
+      `SELECT 
+        mitra_name, business_field, mitra_logo_url 
+      FROM mitras 
+      WHERE is_deleted = FALSE 
+      ORDER BY mitra_name ASC`
     )
     return rows
   }
 
-  static async getMitraById(mitraId: string) {
-    let result
-    try {
-      result = await supabasePool.query(
-        `SELECT mitra_id FROM mitras WHERE mitra_id = $1`,
-        [mitraId]
-      )
-    } catch {
-      throw new BadRequest('Invalid mitra_id format')
+  static async verifyMitraIsExist(mitraId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 1 FROM mitras
+        WHERE mitra_id = $1 AND is_deleted = FALSE`,
+      [mitraId]
+    )
+    if (rows.length === 0) {
+      throw new ResourceNotFoundError('Resource mitra tidak ditemukan')
     }
+  }
 
-    if (result.rows.length < 1) {
-      throw new ResourceNotFoundError('Resource mitra not found')
-    }
-    return result.rows[0]
+  static async getMitraById(mitraId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        mitra_name, business_field, mitra_logo_url 
+      FROM mitras WHERE mitra_id = $1 AND is_deleted = FALSE`,
+      [mitraId]
+    )
+    return rows[0]
   }
 
   static async updateMitra(
     mitraId: string,
-    payload: Partial<MitraUpdateProps>,
+    payload: Partial<MitraProps>,
     logoUrl: string | null,
     userWhoUpdated: string
   ) {

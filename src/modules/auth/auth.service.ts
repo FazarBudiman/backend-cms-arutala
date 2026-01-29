@@ -9,7 +9,7 @@ export class AuthService {
     const { rows } = await supabasePool.query(
       `SELECT u.user_id, u.password_hash, r.role_name FROM users u
                 JOIN roles r ON u.user_role_id = r.role_id
-                WHERE username = $1 `,
+                WHERE u.username = $1 AND u.is_deleted = FALSE`,
       [payload.username]
     )
 

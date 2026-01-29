@@ -106,3 +106,114 @@ export const CourseBatchPosterUploadModel = t.Object({
 export type CourseBatchPosterUploadProps = Static<
   typeof CourseBatchPosterUploadModel
 >
+
+// Model Update Course Batch
+export const CourseBatchSessionModel = t.Optional(
+  t.Array(
+    t.Object({
+      topic: t.String({
+        minLength: 5,
+        maxLength: 255,
+        error: 'Topik session minimal 5 dan maksimal 255 karakter',
+      }),
+
+      sessionDate: t.String({
+        format: 'date',
+        error: 'Format sessionDate harus date (YYYY-MM-DD)',
+      }),
+
+      sessionStartTime: t.String({
+        pattern: '^([01]\\d|2[0-3]):([0-5]\\d)$',
+        error: 'Format sessionStartTime harus HH:mm (00:00 - 23:59)',
+      }),
+
+      sessionEndTime: t.String({
+        pattern: '^([01]\\d|2[0-3]):([0-5]\\d)$',
+        error: 'Format sessionEndTime harus HH:mm (00:00 - 23:59)',
+      }),
+    })
+  )
+)
+export type CourseBatchSessionProp = Static<typeof CourseBatchSessionModel>
+
+export const CourseBatchPriceModel = t.Optional(
+  t.Object({
+    basePrice: t.Number({
+      error: 'Base price harus berupa angka',
+    }),
+
+    discountType: t.Optional(
+      t.Union([t.Literal('PERCENT'), t.Literal('FIXED')])
+    ),
+
+    discountValue: t.Optional(
+      t.Number({
+        error: 'Discount value harus berupa angka',
+      })
+    ),
+
+    finalPrice: t.Optional(
+      t.Number({
+        error: 'Final price harus berupa angka',
+      })
+    ),
+  })
+)
+
+export type CourseBatchPriceProps = Static<typeof CourseBatchPriceModel>
+
+export const CourseBatchUpdateModel = t.Object({
+  batchName: t.Optional(
+    t.String({
+      minLength: 5,
+      maxLength: 255,
+      error: 'Nama batch minimal 5 dan maksimal 255 karakter',
+    })
+  ),
+
+  contributorId: t.Optional(
+    t.String({
+      format: 'uuid',
+      error: 'Format contributorId harus UUID',
+    })
+  ),
+
+  registrationStart: t.Optional(
+    t.String({
+      format: 'date',
+      error: 'Format registrationStart harus date (YYYY-MM-DD)',
+    })
+  ),
+
+  registrationEnd: t.Optional(
+    t.String({
+      format: 'date',
+      error: 'Format registrationEnd harus date (YYYY-MM-DD)',
+    })
+  ),
+
+  startDate: t.Optional(
+    t.String({
+      format: 'date',
+      error: 'Format startDate harus date (YYYY-MM-DD)',
+    })
+  ),
+
+  endDate: t.Optional(
+    t.String({
+      format: 'date',
+      error: 'Format endDate harus date (YYYY-MM-DD)',
+    })
+  ),
+
+  batchStatus: t.Optional(
+    t.Enum(BatchStatus, {
+      error: 'Batch status tidak valid',
+    })
+  ),
+
+  batchSession: CourseBatchSessionModel,
+  batchPrice: CourseBatchPriceModel,
+})
+
+export type CourseBatchUpdateProps = Static<typeof CourseBatchUpdateModel>

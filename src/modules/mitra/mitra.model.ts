@@ -1,6 +1,7 @@
 import { Static, t } from 'elysia'
 
-export const MitraCreateModel = t.Object({
+// Model Request Body Mitra
+export const MitraModel = t.Object({
   mitraName: t.String({
     minLength: 2,
     maxLength: 100,
@@ -30,44 +31,13 @@ export const MitraCreateModel = t.Object({
       'File harus berupa gambar (JPG, PNG, WEBP) dengan ukuran maksimal 5MB',
   }),
 })
+export type MitraProps = Static<typeof MitraModel>
 
-export type MitraCreateProps = Static<typeof MitraCreateModel>
-
-export const MitraUpdateModel = t.Object({
-  mitraName: t.Optional(
-    t.String({
-      minLength: 2,
-      maxLength: 100,
-      error: 'Nama perusahaan harus memiliki 3 sampai 100 karakter',
-    })
-  ),
-
-  businessField: t.Optional(
-    t
-      .Transform(
-        t.Union([
-          t.String({ error: 'Isi minimal 1 bidang perusahaan' }), // Terima string (1 nilai)
-          t.Array(t.String(), {
-            minItems: 1,
-            error: 'Isi minimal satu bidang perusahaan',
-          }), // Atau array (multiple nilai)
-        ])
-      )
-      .Decode((value) => {
-        // Normalize: selalu jadikan array
-        return Array.isArray(value) ? value : [value]
-      })
-      .Encode((value) => value) // Encode tetap array
-  ),
-
-  mitraLogo: t.Optional(
-    t.File({
-      type: ['image/jpeg', 'image/png', 'image/webp'],
-      maxSize: '5m', // Batasi maksimal 2MB
-      error:
-        'File harus berupa gambar (JPG, PNG, WEBP) dengan ukuran maksimal 5MB',
-    })
-  ),
+// Model Params Mitra Id
+export const ParamsMitraModel = t.Object({
+  mitraId: t.String({
+    format: 'uuid',
+    error: 'Format param mitra id tidak valid',
+  }),
 })
-
-export type MitraUpdateProps = Static<typeof MitraUpdateModel>
+export type ParamsMitraProps = Static<typeof ParamsMitraModel>

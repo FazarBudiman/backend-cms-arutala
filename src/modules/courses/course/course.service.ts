@@ -4,13 +4,10 @@ import {
   ResourceNotFoundError,
 } from '../../../exceptions/client.error'
 import { supabasePool } from '../../../supabase/supabasePool'
-import {
-  CourseBenefitsUpdateProps,
-  CourseMaterialsUpdateProps,
-  CourseUpdateProps,
-  QueryParamsCourseProps,
-} from './course.model'
+import { CourseUpdateProps, QueryParamsCourseProps } from './course.model'
 import { CourseCreateProps } from './course.model'
+import { COurseBenefitUpdateProps } from '../courses-benefit/course-benefit.model'
+import { CourseMaterialUpdateProps } from './course-material/course-material.model'
 
 export class CourseService {
   static async addCourse(payload: CourseCreateProps, userWhocreated: string) {
@@ -362,7 +359,7 @@ export class CourseService {
   static async replaceCourseBenefits(
     client: PoolClient,
     courseId: string,
-    benefits: CourseBenefitsUpdateProps
+    benefits: COurseBenefitUpdateProps
   ) {
     await client.query(
       `DELETE FROM courses_course_benefits WHERE ccb_course_id = $1`,
@@ -382,7 +379,7 @@ export class CourseService {
   static async replaceCourseMaterials(
     client: PoolClient,
     courseId: string,
-    materials: CourseMaterialsUpdateProps
+    materials: CourseMaterialUpdateProps
   ) {
     await client.query(
       `DELETE FROM course_materials WHERE course_material_course_id = $1`,

@@ -3,33 +3,34 @@ import { AuthUser } from '../../types/auth.type'
 import { ApiResponse } from '../../types/response.type'
 import { ResponseHelper } from '../../utils/responseHelper'
 import {
-  ContributorCreateProps,
-  ContributorUpdateProps,
+  ContributorProps,
+  ParamsContributorProps,
+  QueryContributorTypeProps,
 } from './contributor.model'
 import { ContributorService } from './contributor.service'
 
 export class ContributorController {
   static async addContributorController(
-    payload: ContributorCreateProps,
+    payload: ContributorProps,
     user: AuthUser
   ): Promise<ApiResponse> {
     const urlProfile = await upload(payload.profile, '/contributor')
-    const contributor_id = await ContributorService.addContributor(
+    const contributorId = await ContributorService.addContributor(
       payload,
-      user.user_id,
-      urlProfile
+      urlProfile,
+      user.user_id
     )
 
     return ResponseHelper.created(
       'Menambah contributor berhasil',
-      contributor_id
+      contributorId
     )
   }
 
   static async getAllContributorController(
-    type?: 'internal' | 'external'
+    query: QueryContributorTypeProps
   ): Promise<ApiResponse> {
-    const contributors = await ContributorService.getAllContributor(type)
+    const contributors = await ContributorService.getAllContributor(query)
 
     return ResponseHelper.success(
       'Mengambil semua data contributor berhasil',
@@ -37,17 +38,32 @@ export class ContributorController {
     )
   }
 
+  static async getContributorByIdController(
+    params: ParamsContributorProps
+  ): Promise<ApiResponse> {
+    const { contributorId } = params
+    await ContributorService.verifyContributorIsExist(contributorId)
+    const contributor =
+      await ContributorService.getContributorById(contributorId)
+    return ResponseHelper.success(
+      'Mengalbil data contributor berhasil',
+      contributor
+    )
+  }
+
   static async updateContributorController(
-    contributorId: string,
-    payload: ContributorUpdateProps,
+    params: ParamsContributorProps,
+    payload: Partial<ContributorProps>,
     user: AuthUser
   ): Promise<ApiResponse> {
-    await ContributorService.getContributorById(contributorId)
+    const { contributorId } = params
+    await ContributorService.verifyContributorIsExist(contributorId)
 
     let profileUrl: string | null = null
     if (payload.profile) {
       profileUrl = await upload(payload.profile, '/contributor')
     }
+
     const { contributor_name } = await ContributorService.updateContributor(
       contributorId,
       payload,
@@ -61,9 +77,10 @@ export class ContributorController {
   }
 
   static async deleteContributorController(
-    contributorId: string
+    params: ParamsContributorProps
   ): Promise<ApiResponse> {
-    await ContributorService.getContributorById(contributorId)
+    const { contributorId } = params
+    await ContributorService.verifyContributorIsExist(contributorId)
     const { contributor_name } =
       await ContributorService.deleteContributor(contributorId)
 

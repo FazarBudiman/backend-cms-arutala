@@ -4,6 +4,7 @@ import { assertAuth } from '../../../../utils/assertAuth'
 import {
   CourseBatchCreateModel,
   CourseBatchPosterUploadModel,
+  CourseBatchUpdateModel,
 } from './course-batch.model'
 import { CourseBatchController } from './course-batch.controller'
 import { requireAuth } from '../../../../guards/auth.guard'
@@ -33,10 +34,11 @@ export const courseBatch = new Elysia({ prefix: '/:courseId/batch' })
   )
   .post(
     '/:batchId/upload',
-    async ({ body, params }) => {
+    async ({ body, params, store }) => {
       const res = await CourseBatchController.uploadCourseBatchPosterController(
         body,
-        params
+        params,
+        assertAuth(store)
       )
       return res
     },
@@ -50,21 +52,38 @@ export const courseBatch = new Elysia({ prefix: '/:courseId/batch' })
     }
   )
 
-// .put(
-//   '/:batchId',
-//   async ({ body, params, store }) => {
-//     const res = await CourseBatchController.updateCourseBatchController(
-//       body,
-//       params.batchId,
-//       store
-//     )
-//     return res
-//   },
-//   {
-//     beforeHandle: requireAuth('UPDATE_COURSE'),
-//     detail: {
-//       tags: ['Courses'],
-//       summary: '[course-batch] Update Batch in Course by Batch Id',
-//     },
-//   }
-// )
+  .put(
+    '/:batchId',
+    async ({ body, params, store }) => {
+      const res = await CourseBatchController.updateCourseBatchController(
+        body,
+        params,
+        assertAuth(store)
+      )
+      return res
+    },
+    {
+      beforeHandle: requireAuth('UPDATE_COURSE'),
+      body: CourseBatchUpdateModel,
+      detail: {
+        tags: ['Courses'],
+        summary: '[course-batch] Update Batch in Course by Batch Id',
+      },
+    }
+  )
+
+  .delete(
+    '/:batchId',
+    async ({ params }) => {
+      const res =
+        await CourseBatchController.deleteCourseBatchController(params)
+      return res
+    },
+    {
+      beforeHandle: requireAuth('DELETE_COURSE'),
+      detail: {
+        tags: ['Courses'],
+        summary: '[course-batch] Delete Batch in Course by Batch Id',
+      },
+    }
+  )

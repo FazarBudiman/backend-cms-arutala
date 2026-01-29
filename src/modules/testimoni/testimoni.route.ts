@@ -3,7 +3,11 @@ import Elysia, { t } from 'elysia'
 import { assertAuth } from '../../utils/assertAuth'
 import { TestimoniController } from './testimoni.controller'
 import { requireAuth } from '../../guards/auth.guard'
-import { TestimoniCreateModel, TestimoniUpdateModel } from './testimoni.model'
+import {
+  ParamsTestimoniModel,
+  QueryTestimoniModel,
+  TestimoniModel,
+} from './testimoni.model'
 
 export const testimoni = new Elysia().group('/testimonies', (app) =>
   app
@@ -20,7 +24,7 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
       },
       {
         beforeHandle: requireAuth('CREATE_TESTIMONI'),
-        body: TestimoniCreateModel,
+        body: TestimoniModel,
         detail: {
           tags: ['Testimoni'],
           summary: 'Create a New Testimoni',
@@ -30,36 +34,48 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
     .get(
       '/',
       async ({ query }) => {
-        const { category } = query
-        const res =
-          await TestimoniController.getAllTestimoniController(category)
+        const res = await TestimoniController.getAllTestimoniController(query)
         return res
       },
       {
-        query: t.Object({
-          category: t.Optional(
-            t.Union([t.Literal('siswa'), t.Literal('talent')])
-          ),
-        }),
+        query: QueryTestimoniModel,
         detail: {
           tags: ['Testimoni'],
           summary: 'Get All Testimoni with Query Parameter',
         },
       }
     )
-    .put(
+
+    .get(
+      '/:testimoniId',
+      async ({ params }) => {
+        const res = await TestimoniController.getTestimoniByIdController(params)
+        return res
+      },
+      {
+        beforeHandle: requireAuth('READ_TESTIMONI'),
+        params: ParamsTestimoniModel,
+        detail: {
+          tags: ['Testimoni'],
+          summary: 'Get Testimoni by Id',
+        },
+      }
+    )
+
+    .patch(
       '/:testimoniId',
       async ({ body, store, params }) => {
         const res = await TestimoniController.updateTestimoniController(
           body,
-          params.testimoniId,
+          params,
           assertAuth(store)
         )
         return res
       },
       {
         beforeHandle: requireAuth('UPDATE_TESTIMONI'),
-        body: TestimoniUpdateModel,
+        body: t.Partial(TestimoniModel),
+        params: ParamsTestimoniModel,
         detail: {
           tags: ['Testimoni'],
           summary: 'Update Testimoni by Id',
@@ -69,13 +85,12 @@ export const testimoni = new Elysia().group('/testimonies', (app) =>
     .delete(
       '/:testimoniId',
       async ({ params }) => {
-        const res = await TestimoniController.deleteTestimoniController(
-          params.testimoniId
-        )
+        const res = await TestimoniController.deleteTestimoniController(params)
         return res
       },
       {
         beforeHandle: requireAuth('DELETE_TESTIMONI'),
+        params: ParamsTestimoniModel,
         detail: {
           tags: ['Testimoni'],
           summary: 'Delete Testimoni by Id',
