@@ -1,12 +1,9 @@
-import {
-  BadRequest,
-  ResourceNotFoundError,
-} from '../../exceptions/client.error'
+import { ResourceNotFoundError } from '../../exceptions/client.error'
 import { supabasePool } from '../../supabase/supabasePool'
-import { MessageCreateProps, MessageUpdateProps } from './message.model'
+import { MessageProps, MessageUpdateProps } from './message.model'
 
 export class MessageService {
-  static async addMessage(payload: MessageCreateProps) {
+  static async addMessage(payload: MessageProps) {
     const {
       senderName,
       senderEmail,
@@ -17,7 +14,9 @@ export class MessageService {
     } = payload
     const { rows } = await supabasePool.query(
       `INSERT INTO messages(
-          sender_name, sender_email, organization_name, sender_phone, subject, message_body, message_status, created_date)
+          sender_name, sender_email, organization_name, 
+          sender_phone, subject, message_body, 
+          message_status, created_date)
         VALUES ($1, $2, $3, $4, $5, $6, 'NEW', NOW()) 
         RETURNING message_id`,
       [
@@ -34,29 +33,40 @@ export class MessageService {
 
   static async getAllMessage() {
     const { rows } = await supabasePool.query(
-      `SELECT message_id, sender_name, sender_email, sender_phone, organization_name, message_status, subject, message_body, created_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS created_date
-          FROM messages 
-          WHERE is_deleted = false 
-          ORDER BY created_date DESC`
+      `SELECT 
+        message_id, sender_name, sender_email, 
+        sender_phone, organization_name, message_status, 
+        subject, message_body, 
+        created_date AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Jakarta' AS created_date
+      FROM messages 
+      WHERE is_deleted = false 
+      ORDER BY created_date DESC`
     )
     return rows
   }
 
   static async getMessageById(messageId: string) {
-    let result
-    try {
-      result = await supabasePool.query(
-        `SELECT message_id FROM messages WHERE message_id = $1 AND is_deleted = false`,
-        [messageId]
-      )
-    } catch {
-      throw new BadRequest('Invalid message ID format')
-    }
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        message_id, sender_name, sender_email, 
+        sender_phone, organization_name, message_status, 
+        subject, message_body
+      FROM messages 
+      WHERE message_id = $1 AND is_deleted = false`,
+      [messageId]
+    )
+    return rows[0]
+  }
 
-    if (result.rows.length < 1) {
-      throw new ResourceNotFoundError('Message not found')
+  static async verifyMessageIsExist(messageId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 1 FROM messages
+        WHERE message_id = $1 AND is_deleted = FALSE`,
+      [messageId]
+    )
+    if (rows.length === 0) {
+      throw new ResourceNotFoundError('Resource pesan tidak ditemukan')
     }
-    return result.rows[0]
   }
 
   static async updateMessageById(
@@ -65,10 +75,11 @@ export class MessageService {
     userWhoUpdated: string
   ) {
     const { rows } = await supabasePool.query(
-      `UPDATE messages 
-        SET message_status = $1, updated_by = $2, updated_date = NOW() 
-        WHERE message_id = $3 
-        RETURNING sender_name`,
+      `UPDATE messages SET 
+        message_status = $1, updated_by = $2, 
+        updated_date = NOW() 
+      WHERE message_id = $3 
+      RETURNING sender_name`,
       [payload.status, userWhoUpdated, messageId]
     )
     return rows[0]

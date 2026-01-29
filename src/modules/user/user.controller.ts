@@ -2,12 +2,12 @@ import { upload } from '../../shared/services/upload'
 import { AuthUser } from '../../types/auth.type'
 import { ApiResponse } from '../../types/response.type'
 import { ResponseHelper } from '../../utils/responseHelper'
-import { UserCreateProps } from './user.model'
+import { ParamsUserProps, UserProps } from './user.model'
 import { UserService } from './user.service'
 
 export class UserController {
   static async addUserController(
-    payload: UserCreateProps,
+    payload: UserProps,
     userWhoCreated: AuthUser
   ): Promise<ApiResponse> {
     await UserService.verifyUsernameIsExisting(payload.username)
@@ -31,8 +31,20 @@ export class UserController {
     return ResponseHelper.success('Mengambil semua data user berhasil', rows)
   }
 
-  static async deleteUserController(userId: string): Promise<ApiResponse> {
-    await UserService.getUserById(userId)
+  static async getUserByIdController(
+    params: ParamsUserProps
+  ): Promise<ApiResponse> {
+    const { userId } = params
+    await UserService.verifyUserIsExistById(userId)
+    const user = await UserService.getUserById(userId)
+    return ResponseHelper.success('Mengambil data user berhasil', user)
+  }
+
+  static async deleteUserController(
+    params: ParamsUserProps
+  ): Promise<ApiResponse> {
+    const { userId } = params
+    await UserService.verifyUserIsExistById(userId)
     const { username } = await UserService.deleteUserById(userId)
 
     return ResponseHelper.success(`Menghapus user: ${username} berhasil`)

@@ -1,13 +1,10 @@
-import {
-  BadRequest,
-  ResourceNotFoundError,
-} from '../../exceptions/client.error'
+import { ResourceNotFoundError } from '../../exceptions/client.error'
 import { supabasePool } from '../../supabase/supabasePool'
-import { TestimoniCreateProps, TestimoniUpdateProps } from './testimoni.model'
+import { QueryTestimoniProps, TestimoniProps } from './testimoni.model'
 
 export class TestimoniService {
   static async addTestimoni(
-    payload: TestimoniCreateProps,
+    payload: TestimoniProps,
     authorProfileUrl: string,
     userWhoCreated: string
   ) {
@@ -20,8 +17,11 @@ export class TestimoniService {
     } = payload
 
     const { rows } = await supabasePool.query(
-      `INSERT INTO testimonies(author_name, author_job_title, author_company_name, author_profile_url, testimoni_content, testimoni_category, created_by)
-            VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING testimoni_id`,
+      `INSERT INTO testimonies(
+        author_name, author_job_title, author_company_name, 
+        author_profile_url, testimoni_content, testimoni_category, created_by)
+      VALUES($1, $2, $3, $4, $5, $6, $7) 
+      RETURNING testimoni_id`,
       [
         authorName,
         authorJobTitle,
@@ -36,40 +36,52 @@ export class TestimoniService {
     return rows[0]
   }
 
-  static async getAllTestimoni(category?: 'siswa' | 'talent') {
-    let query = `SELECT author_name, author_job_title, author_company_name, author_profile_url, testimoni_content FROM testimonies
-            WHERE is_displayed = true AND is_deleted = false`
+  static async getAllTestimoni(query: QueryTestimoniProps) {
+    const conditions: string[] = ['is_deleted = FALSE']
+    const values: any[] = []
+    let idx = 1
 
-    const params: any[] = []
-
+    const { category } = query
     if (category) {
-      query += ` AND testimoni_category = $1`
-      params.push(category.toUpperCase())
+      conditions.push(`testimoni_category = $${idx++}`)
+      values.push(category.toUpperCase())
     }
-    const { rows } = await supabasePool.query(query, params)
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        author_name, author_job_title, author_company_name, 
+        author_profile_url, testimoni_content 
+      FROM testimonies
+      WHERE ${conditions.join(' AND ')}`,
+      values
+    )
     return rows
   }
 
-  static async getTestimoniById(testimoniId: string) {
-    let result
-    try {
-      result = await supabasePool.query(
-        `SELECT testimoni_id FROM testimonies WHERE testimoni_id = $1`,
-        [testimoniId]
-      )
-    } catch {
-      throw new BadRequest('Invalid testimoni_id fromat')
+  static async verifyTestimoniIsExist(testimoniId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 1 FROM testimonies WHERE testimoni_id = $1 AND is_deleted = FALSE`,
+      [testimoniId]
+    )
+    if (rows.length === 0) {
+      throw new ResourceNotFoundError('Resource testimoni tidak ditemukan')
     }
+  }
 
-    if (result.rows.length < 1) {
-      throw new ResourceNotFoundError('Resource mitra not found')
-    }
-    return result.rows[0]
+  static async getTestimoniById(testimoniId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        author_name, author_job_title, author_company_name, 
+        author_profile_url, testimoni_content  
+      FROM testimonies WHERE testimoni_id = $1`,
+      [testimoniId]
+    )
+
+    return rows[0]
   }
 
   static async updateTestimoni(
     testimoniId: string,
-    payload: Partial<TestimoniUpdateProps>,
+    payload: Partial<TestimoniProps>,
     authorProfileUrl: string | null,
     userWhoUpdated: string
   ) {
@@ -96,10 +108,6 @@ export class TestimoniService {
     if (payload.testimoniCategory) {
       fields.push(`testimoni_category = $${idx++}`)
       values.push(payload.testimoniCategory)
-    }
-    if (payload.isDisplayed !== undefined) {
-      fields.push(`is_displayed = $${idx++}`)
-      values.push(payload.isDisplayed)
     }
     if (authorProfileUrl) {
       fields.push(`author_profile_url = $${idx++}`)

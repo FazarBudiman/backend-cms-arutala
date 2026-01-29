@@ -1,11 +1,12 @@
 import { Static, t } from 'elysia'
 
+// Model Request Body User
 export const UserRole = {
   ADMIN: 'ADMIN',
   SUPER_ADMIN: 'SUPER_ADMIN',
 } as const
 
-export const UserCreateModel = t.Object({
+export const UserModel = t.Object({
   username: t.String({
     minLength: 8,
     pattern: '^[^\\s]+$',
@@ -35,5 +36,13 @@ export const UserCreateModel = t.Object({
       'File harus berupa gambar (JPG, PNG, WEBP) dengan ukuran maksimal 5MB',
   }),
 })
+export type UserProps = Static<typeof UserModel>
 
-export type UserCreateProps = Static<typeof UserCreateModel>
+// Model Params User Id
+export const ParamsUserModel = t.Object({
+  userId: t.String({
+    format: 'uuid',
+    error: 'Format param user id tidak valid',
+  }),
+})
+export type ParamsUserProps = Static<typeof ParamsUserModel>

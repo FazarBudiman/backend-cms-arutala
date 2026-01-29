@@ -1,6 +1,7 @@
 import { Static, t } from 'elysia'
 
-export const MessageCreateModel = t.Object({
+// Model Request Body Message
+export const MessageModel = t.Object({
   senderName: t.String({
     minLength: 3,
     maxLength: 50,
@@ -29,8 +30,16 @@ export const MessageCreateModel = t.Object({
     error: 'Pesan minimal 10 karakter dan maksimal 2000 karakter',
   }),
 })
+export type MessageProps = Static<typeof MessageModel>
 
-export type MessageCreateProps = Static<typeof MessageCreateModel>
+// Model Params Message Id
+export const ParamsMessageModel = t.Object({
+  messageId: t.String({
+    format: 'uuid',
+    error: 'Format param message id tidak valid',
+  }),
+})
+export type ParamsMessageProps = Static<typeof ParamsMessageModel>
 
 // Definisikan dalam satu konstanta/enum
 export const MessageStatus = {

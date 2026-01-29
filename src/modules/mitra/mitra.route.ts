@@ -1,9 +1,9 @@
 import bearer from '@elysiajs/bearer'
-import Elysia from 'elysia'
+import Elysia, { t } from 'elysia'
 import { MitraController } from './mitra.controller'
-import { MitraCreateModel, MitraUpdateModel } from './mitra.model'
 import { requireAuth } from '../../guards/auth.guard'
 import { assertAuth } from '../../utils/assertAuth'
+import { MitraModel, ParamsMitraModel } from './mitra.model'
 
 export const mitra = new Elysia().group('/mitras', (app) =>
   app
@@ -20,7 +20,7 @@ export const mitra = new Elysia().group('/mitras', (app) =>
       },
       {
         beforeHandle: requireAuth('CREATE_MITRA'),
-        body: MitraCreateModel,
+        body: MitraModel,
         detail: {
           tags: ['Mitra'],
           summary: 'Create a New Mitra',
@@ -40,11 +40,27 @@ export const mitra = new Elysia().group('/mitras', (app) =>
         },
       }
     )
-    .put(
+
+    .get(
+      '/:mitraId',
+      async ({ params }) => {
+        const res = await MitraController.getMitraByIdController(params)
+        return res
+      },
+      {
+        beforeHandle: requireAuth('READ_MITRA'),
+        params: ParamsMitraModel,
+        detail: {
+          tags: ['Mitra'],
+          summary: 'get Mitra By Id',
+        },
+      }
+    )
+    .patch(
       '/:mitraId',
       async ({ body, store, params }) => {
         const res = await MitraController.updateMitraController(
-          params.mitraId,
+          params,
           body,
           assertAuth(store)
         )
@@ -52,7 +68,8 @@ export const mitra = new Elysia().group('/mitras', (app) =>
       },
       {
         beforeHandle: requireAuth('UPDATE_MITRA'),
-        body: MitraUpdateModel,
+        body: t.Partial(MitraModel),
+        params: ParamsMitraModel,
         detail: {
           tags: ['Mitra'],
           summary: 'Update Mitra by Id',

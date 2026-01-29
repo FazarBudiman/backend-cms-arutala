@@ -1,4 +1,12 @@
 import { Static, t } from 'elysia'
+import {
+  CourseBenefitCreateModel,
+  CourseBenefitUpdateModel,
+} from '../courses-benefit/course-benefit.model'
+import {
+  CourseMaterialCreateModel,
+  CourseMaterialUpdateModel,
+} from './course-material/course-material.model'
 
 // Model Create Course
 export const CourseCreateModel = t.Object({
@@ -20,77 +28,13 @@ export const CourseCreateModel = t.Object({
     format: 'uuid',
     error: 'Format uuid tidak valid',
   }),
-  courseBenefits: t.Array(
-    t.Object({
-      courseBenefitId: t.String({
-        format: 'uuid',
-        error: 'Format uuid tidak valid',
-      }),
-      orderNum: t.Integer({
-        error: 'order num harus integer',
-      }),
-    })
-  ),
-  courseMaterials: t.Array(
-    t.Object({
-      title: t.String({
-        minLength: 5,
-        maxLength: 255,
-        error: 'Judul course minimal 5 dan maksimal 255 karakter',
-      }),
-      description: t.String({
-        minLength: 50,
-        maxLength: 1000,
-        error: 'Deskripsi course minimal 50 dan maksimal 1000 karakter',
-      }),
-      orderNum: t.Integer({
-        error: 'order num harus integer',
-      }),
-    })
-  ),
+  courseBenefits: CourseBenefitCreateModel,
+  courseMaterials: CourseMaterialCreateModel,
 })
 
 export type CourseCreateProps = Static<typeof CourseCreateModel>
 
 // Model Update Course
-export const CourseBenefitsUpdateModel = t.Optional(
-  t.Array(
-    t.Object({
-      courseBenefitId: t.String({
-        format: 'uuid',
-        error: 'Format uuid tidak valid',
-      }),
-      orderNum: t.Integer({
-        error: 'order num harus integer',
-      }),
-    })
-  )
-)
-
-export type CourseBenefitsUpdateProps = Static<typeof CourseBenefitsUpdateModel>
-
-export const CourseMaterialsUpdateModel = t.Optional(
-  t.Array(
-    t.Object({
-      title: t.String({
-        minLength: 5,
-        maxLength: 255,
-        error: 'Judul course minimal 5 dan maksimal 255 karakter',
-      }),
-      description: t.String({
-        minLength: 50,
-        maxLength: 1000,
-        error: 'Deskripsi course minimal 50 dan maksimal 1000 karakter',
-      }),
-      orderNum: t.Integer({
-        error: 'order num harus integer',
-      }),
-    })
-  )
-)
-export type CourseMaterialsUpdateProps = Static<
-  typeof CourseMaterialsUpdateModel
->
 
 export const CourseUpdateModel = t.Object({
   courseTitle: t.Optional(
@@ -119,8 +63,8 @@ export const CourseUpdateModel = t.Object({
       error: 'Format uuid tidak valid',
     })
   ),
-  courseBenefits: CourseBenefitsUpdateModel,
-  courseMaterials: CourseMaterialsUpdateModel,
+  courseBenefits: CourseBenefitUpdateModel,
+  courseMaterials: CourseMaterialUpdateModel,
 })
 
 export type CourseUpdateProps = Static<typeof CourseUpdateModel>
