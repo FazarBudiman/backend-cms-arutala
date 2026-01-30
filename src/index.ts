@@ -9,6 +9,7 @@ import { mitra } from './modules/mitra/mitra.route'
 import { testimoni } from './modules/testimoni/testimoni.route'
 import { courses } from './modules/courses/courses.index'
 import { contributor } from './modules/contributor/contributor.route'
+import { pages } from './modules/pages/page.route'
 
 const App = new Elysia()
   .use(cors())
@@ -27,6 +28,7 @@ const App = new Elysia()
           { name: 'Mitra', description: 'Mitra Endpoint' },
           { name: 'Testimoni', description: 'Testimoni Endpoint' },
           { name: 'Courses', description: 'Courses Endpoint' },
+          { name: 'pages', description: 'Pages Endpoint' },
         ],
       },
     })
@@ -84,7 +86,7 @@ const App = new Elysia()
   .use(contributor)
   .use(mitra)
   .use(testimoni)
-
   .use(courses)
+  .use(pages)
 
 export default App
