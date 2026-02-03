@@ -1,7 +1,12 @@
 import bearer from '@elysiajs/bearer'
 import Elysia from 'elysia'
 import { requireAuth } from '../../guards/auth.guard'
-import { ArticleCoverUploadModel, ArticleModel } from './article.model'
+import {
+  ArticleCoverUploadModel,
+  ArticleModel,
+  ArticleUpdateModel,
+  ParamsArticleModel,
+} from './article.model'
 import { ArticleController } from './article.controller'
 import { assertAuth } from '../../utils/assertAuth'
 
@@ -42,6 +47,70 @@ export const article = new Elysia().group('/article', (app) =>
         },
       }
     )
-    .get('/', async () => {})
-    .patch('/', async () => {})
+    .get(
+      '/',
+      async () => {
+        const res = await ArticleController.getAllArticleController()
+        return res
+      },
+      {
+        beforeHandle: requireAuth('READ_ARTICLE'),
+        detail: {
+          tags: ['Article'],
+          summary: 'Get All Article',
+        },
+      }
+    )
+
+    .get(
+      '/:articleId',
+      async ({ params }) => {
+        const res = await ArticleController.getArticleByIdController(params)
+        return res
+      },
+      {
+        beforeHandle: requireAuth('READ_ARTICLE'),
+        params: ParamsArticleModel,
+        detail: {
+          tags: ['Article'],
+          summary: 'Get Article by Id',
+        },
+      }
+    )
+    .patch(
+      '/:articleId',
+      async ({ body, params, store }) => {
+        const res = await ArticleController.updateArticleController(
+          body,
+          params,
+          assertAuth(store)
+        )
+        return res
+      },
+      {
+        beforeHandle: requireAuth('UPDATE_ARTICLE'),
+        body: ArticleUpdateModel,
+        params: ParamsArticleModel,
+        detail: {
+          tags: ['Article'],
+          summary: 'Update Article by Id',
+        },
+      }
+    )
+
+    .delete(
+      '/:articleId',
+      async ({ params }) => {
+        const res = await ArticleController.deleteArticleController(params)
+        return res
+      },
+      {
+        beforeHandle: requireAuth('DELETE_ARTICLE'),
+        params: ParamsArticleModel,
+        detail: {
+          tags: ['Article'],
+          summary: 'Delete Article by Id',
+        },
+      }
+    )
 )

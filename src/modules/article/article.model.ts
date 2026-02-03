@@ -1,29 +1,56 @@
 import { Static, t } from 'elysia'
 
+export const contentBlocksModel = t.Object({
+  id: t.Optional(t.String()),
+  type: t.String(),
+  data: t.Record(t.String(), t.Any()),
+})
+
+// Model Create Article
 export const ArticleModel = t.Object({
-  //   title: t.String({
-  //     minLength: 10,
-  //     error: 'Judul harus merupakan string dan memiliki minimal 10 karakter',
-  //   }),
-  //   coverUrl: t.Optional(
-  //     t.String({
-  //       format: 'uri',
-  //       error: 'Cover harus berupa URL valid',
-  //     })
-  //   ),
-  contentBlocks: t.Array(
-    t.Object({
-      id: t.Optional(t.String()),
-      type: t.String(),
-      data: t.Record(t.String(), t.Any()),
-    }),
-    {
-      minItems: 1,
-      error: 'Artikel harus memiliki 1 block',
-    }
-  ),
+  contentBlocks: t.Array(contentBlocksModel, {
+    minItems: 1,
+    error: 'Artikel harus memiliki 1 block',
+  }),
 })
 export type ArticleProps = Static<typeof ArticleModel>
+
+// Model Update Article
+export const ArticleStatus = {
+  DRAFT: 'DRAFT',
+  REVIEW: 'REVIEW',
+  PUBLISHED: 'PUBLISHED',
+  UNPUBLISHED: 'UNPUBLISHED',
+} as const
+
+export const ArticleUpdateModel = t.Object({
+  // title: t.String({
+  //   minLength: 10,
+  //   error: 'Judul harus merupakan string dan memiliki minimal 10 karakter',
+  // }),
+  // coverUrl: t.Optional(
+  //   t.String({
+  //     format: 'uri',
+  //     error: 'Cover harus berupa URL valid',
+  //   })
+  // ),
+  // contentBlocks: t.Array(contentBlocksModel, {
+  //   minItems: 1,
+  //   error: 'Artikel harus memiliki 1 block',
+  // }),
+  // status: t.Enum(ArticleStatus, {
+  //   error:
+  //     'Status tidak valid. Pilih antara DRAFT, REVIEW, PUBLISHED atau UNPUBLISHED',
+  // }),
+  contentBlocks: t.Optional(t.Array(t.Any())),
+  status: t.Optional(
+    t.Enum(ArticleStatus, {
+      error:
+        'Status tidak valid. Pilih antara DRAFT, REVIEW, PUBLISHED atau UNPUBLISHED',
+    })
+  ),
+})
+export type ArticleUpdateProps = Static<typeof ArticleUpdateModel>
 
 // Model Upload Poster Batch
 export const ArticleCoverUploadModel = t.Object({
@@ -34,3 +61,20 @@ export const ArticleCoverUploadModel = t.Object({
   }),
 })
 export type ArticleCoverUploadProps = Static<typeof ArticleCoverUploadModel>
+
+// Model Params Article
+export const ParamsArticleModel = t.Object({
+  articleId: t.String({
+    format: 'uuid',
+    error: 'Format article id tidak valid',
+  }),
+})
+export type ParamsArticleProps = Static<typeof ParamsArticleModel>
+
+export type UpdateArticleServiceProps = {
+  title?: string
+  coverUrl?: string
+  contentText?: string
+  contentBlocks?: any[]
+  status?: string
+}

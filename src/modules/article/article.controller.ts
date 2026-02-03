@@ -5,7 +5,12 @@ import { generateContentText } from '../../utils/convertContentTeks'
 import { ResponseHelper } from '../../utils/responseHelper'
 import { generateUniquePageSlug } from '../../utils/slug'
 import { PageService } from '../pages/page/page.service'
-import { ArticleCoverUploadProps, ArticleProps } from './article.model'
+import {
+  ArticleCoverUploadProps,
+  ArticleProps,
+  ArticleUpdateProps,
+  ParamsArticleProps,
+} from './article.model'
 import { ArticleService } from './article.service'
 
 export class ArticleController {
@@ -47,5 +52,76 @@ export class ArticleController {
     return ResponseHelper.success('Berhasil upload cover article', {
       cover_url: coverUrl,
     })
+  }
+
+  static async getAllArticleController(): Promise<ApiResponse> {
+    const articles = await ArticleService.getAllArticle()
+    return ResponseHelper.success(
+      'Mengambil semua data article berhasil',
+      articles
+    )
+  }
+
+  static async getArticleByIdController(
+    params: ParamsArticleProps
+  ): Promise<ApiResponse> {
+    const { articleId } = params
+    await ArticleService.verifyArticleIsExist(articleId)
+    const article = await ArticleService.getArticleById(articleId)
+    return ResponseHelper.success('Mengambil data article berhasil', article)
+  }
+
+  static async updateArticleController(
+    payload: ArticleUpdateProps,
+    params: ParamsArticleProps,
+    user: AuthUser
+  ): Promise<ApiResponse> {
+    const { articleId } = params
+    await ArticleService.verifyArticleIsExist(articleId)
+
+    let derivedData: {
+      title?: string
+      coverUrl?: string
+      contentText?: string
+      contentBlocks?: any[]
+    } = {}
+
+    if (payload.contentBlocks) {
+      const { title, coverUrl } = await ArticleService.extractArticleMeta(
+        payload.contentBlocks
+      )
+      const contentText = await generateContentText(payload.contentBlocks)
+
+      derivedData = {
+        title,
+        coverUrl,
+        contentText,
+        contentBlocks: payload.contentBlocks,
+      }
+    }
+
+    const { article_title } = await ArticleService.updateArticle(
+      articleId,
+      {
+        status: payload.status,
+        ...derivedData,
+      },
+      user.user_id
+    )
+
+    return ResponseHelper.success(
+      `Mengubah article: '${article_title}' berhasil`
+    )
+  }
+
+  static async deleteArticleController(
+    params: ParamsArticleProps
+  ): Promise<ApiResponse> {
+    const { articleId } = params
+    await ArticleService.verifyArticleIsExist(articleId)
+    const { article_title } = await ArticleService.deleteArticle(articleId)
+    return ResponseHelper.success(
+      `Menghapus article : '${article_title}' berhasil`
+    )
   }
 }
