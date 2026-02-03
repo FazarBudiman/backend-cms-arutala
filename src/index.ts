@@ -11,6 +11,7 @@ import { courses } from './modules/courses/courses.index'
 import { contributor } from './modules/contributor/contributor.route'
 import { pages } from './modules/pages/pages.index'
 import { article } from './modules/article/article.route'
+import { analytics } from './modules/analytics/analytics.route'
 
 const App = new Elysia()
   .use(cors())
@@ -91,5 +92,6 @@ const App = new Elysia()
   .use(courses)
   .use(pages)
   .use(article)
+  .use(analytics)
 
 export default App
