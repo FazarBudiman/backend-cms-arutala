@@ -3,7 +3,7 @@ import { AuthController } from './auth.controller'
 import { SignInModel } from './auth.model'
 import { jwtPlugin } from '../../plugins/jwt/jwt.plugin'
 
-const { NODE_ENV } = process.env
+// const { NODE_ENV } = process.env
 
 export const auth = (app: Elysia) =>
   app.group('/auth', (app) =>
@@ -22,8 +22,9 @@ export const auth = (app: Elysia) =>
           cookie.refresh_token.set({
             value: data.refresh_token,
             httpOnly: true,
-            secure: NODE_ENV === 'production',
+            // secure: NODE_ENV === 'production',
             // sameSite: 'strict',
+            secure: false,
             sameSite: 'none',
             path: '/',
             maxAge: 60 * 60 * 24 * 7,

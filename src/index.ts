@@ -14,7 +14,12 @@ import { article } from './modules/article/article.route'
 import { analytics } from './modules/analytics/analytics.route'
 
 const App = new Elysia()
-  .use(cors())
+  .use(
+    cors({
+      origin: 'http://localhost:3000',
+      credentials: true,
+    })
+  )
   .use(
     swagger({
       documentation: {
