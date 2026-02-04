@@ -1,7 +1,9 @@
 import { Elysia } from 'elysia'
 import { AuthController } from './auth.controller'
-import { RefreshTokenModel, SignInModel } from './auth.model'
+import { SignInModel } from './auth.model'
 import { jwtPlugin } from '../../plugins/jwt/jwt.plugin'
+
+const { NODE_ENV } = process.env
 
 export const auth = (app: Elysia) =>
   app.group('/auth', (app) =>
@@ -9,12 +11,23 @@ export const auth = (app: Elysia) =>
       .use(jwtPlugin)
       .post(
         '/sign-in',
-        async ({ body, accessToken, refreshToken }) => {
+        async ({ body, accessToken, refreshToken, cookie }) => {
           const res = await AuthController.signInController(
             body,
             accessToken,
             refreshToken
           )
+
+          const { data } = res
+          cookie.refresh_token.set({
+            value: data.refresh_token,
+            httpOnly: true,
+            secure: NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+          })
+
           return res
         },
         {
@@ -28,16 +41,17 @@ export const auth = (app: Elysia) =>
 
       .put(
         '/refresh',
-        async ({ body, accessToken, refreshToken }) => {
+        async ({ cookie, accessToken, refreshToken }) => {
+          const token = cookie.refresh_token.value
+
           const res = AuthController.refreshController(
-            body,
+            token,
             accessToken,
             refreshToken
           )
           return res
         },
         {
-          body: RefreshTokenModel,
           detail: {
             tags: ['Auth'],
             summary: 'Refresh Access Token',
@@ -46,12 +60,12 @@ export const auth = (app: Elysia) =>
       )
       .delete(
         '/sign-out',
-        async ({ body }) => {
-          const res = await AuthController.signOutController(body)
+        async ({ cookie }) => {
+          const token = cookie.refresh_token.value
+          const res = await AuthController.signOutController(token)
           return res
         },
         {
-          body: RefreshTokenModel,
           detail: {
             tags: ['Auth'],
             summary: 'Sign Out',
