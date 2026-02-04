@@ -1,6 +1,8 @@
 # Back End - CMS Arutala
 
-## Development
+## Tech Stack: Bun + ELysia + PostgreSql
+
+### Development
 
 To start the development server run:
 
