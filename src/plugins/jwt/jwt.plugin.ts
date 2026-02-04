@@ -9,7 +9,7 @@ export const jwtPlugin = new Elysia()
     jwt({
       name: 'accessToken',
       secret: ACCESS_TOKEN_KEY!,
-      exp: '60m',
+      exp: '1d',
       schema: AccessTokenSchema,
     })
   )

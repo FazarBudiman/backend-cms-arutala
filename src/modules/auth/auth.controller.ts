@@ -2,7 +2,7 @@ import { BadRequest } from '../../exceptions/client.error'
 import { AccessTokenPayload } from '../../plugins/jwt/token.schema'
 import { ApiResponse } from '../../types/response.type'
 import { ResponseHelper } from '../../utils/responseHelper'
-import { RefreshTokenProps, SignInProps } from './auth.model'
+import { SignInProps } from './auth.model'
 import { AuthService } from './auth.service'
 
 export class AuthController {
@@ -38,7 +38,7 @@ export class AuthController {
   }
 
   static async refreshController(
-    payload: RefreshTokenProps,
+    token: string | undefined,
     accessToken: {
       sign: (payload: AccessTokenPayload) => Promise<string>
     },
@@ -46,16 +46,16 @@ export class AuthController {
       verify: (token?: string) => Promise<any>
     }
   ): Promise<ApiResponse> {
-    const { refresh_token } = payload
+    // const { refresh_token } = payload
 
     // 1. Verify refresh token JWT
-    const decoded = await refreshToken.verify(refresh_token)
+    const decoded = await refreshToken.verify(token)
     if (!decoded) {
       throw new BadRequest('Invalid refresh token')
     }
 
     // 2. Check refresh token exists in DB
-    await AuthService.verifyRefreshTokenExist(refresh_token)
+    await AuthService.verifyRefreshTokenExist(token)
 
     // 3. Issue new access token (reuse claims)
     const newAccessToken = await accessToken.sign({
@@ -70,12 +70,10 @@ export class AuthController {
   }
 
   static async signOutController(
-    payload: RefreshTokenProps
+    token: string | undefined
   ): Promise<ApiResponse> {
-    const { refresh_token } = payload
-    await AuthService.verifyRefreshTokenExist(refresh_token)
-
-    await AuthService.deleteRefreshToken(refresh_token)
+    await AuthService.verifyRefreshTokenExist(token)
+    await AuthService.deleteRefreshToken(token)
 
     return ResponseHelper.success('Sign out berhasil')
   }
