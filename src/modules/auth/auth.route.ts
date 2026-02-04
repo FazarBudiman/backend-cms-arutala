@@ -23,7 +23,8 @@ export const auth = (app: Elysia) =>
             value: data.refresh_token,
             httpOnly: true,
             secure: NODE_ENV === 'production',
-            sameSite: 'strict',
+            // sameSite: 'strict',
+            sameSite: 'none',
             path: '/',
             maxAge: 60 * 60 * 24 * 7,
           })
