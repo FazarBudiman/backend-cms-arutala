@@ -85,7 +85,7 @@ export class ArticleService {
         a.article_content_text, a.article_status, 
         a.created_date, u.full_name
       FROM articles a  JOIN users u ON a.created_by = u.user_id
-      WHERE a.article_id = = $1`,
+      WHERE a.article_id = $1`,
       [articleId]
     )
     return rows[0]
