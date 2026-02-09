@@ -58,11 +58,12 @@ export class ArticleService {
   static async getAllArticle() {
     const { rows } = await supabasePool.query(
       `SELECT 
-        article_id, article_title, article_cover_url, 
-        article_content_text, article_status
+        article_id, article_title, 
+        article_cover_url, article_content_text, 
+        article_status, created_date
       FROM articles 
-      WHERE is_deleted = FALSE
-        `
+      WHERE is_deleted = FALSE 
+        AND article_status = 'PUBLISHED'`
     )
     return rows
   }
