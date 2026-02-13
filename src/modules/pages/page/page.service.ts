@@ -33,8 +33,13 @@ export class PageService {
 
   static async getAllPages() {
     const { rows } = await supabasePool.query(
-      `SELECT page_id, page_title, page_slug FROM pages
-        WHERE is_deleted = FALSE`
+      `SELECT 
+        child.page_id, child.page_title, child.page_slug,
+        parent.page_title AS parent_page_title
+      FROM pages AS child
+      LEFT JOIN pages AS parent
+        ON child.parent_page_id = parent.page_id
+      WHERE child.is_deleted = FALSE;`
     )
     return rows
   }

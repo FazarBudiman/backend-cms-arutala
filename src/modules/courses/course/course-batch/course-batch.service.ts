@@ -118,7 +118,7 @@ export class CourseBatchService {
   static async getCourseBatchByCourseId(courseId: string) {
     const { rows } = await supabasePool.query(
       `SELECT 
-        cb.course_batch_name as name, cb.course_batch_poster_url as poster_url, 
+        cb.course_batch_id, cb.course_batch_name as name, cb.course_batch_poster_url as poster_url, 
           cb.course_batch_registration_start as registration_start,
           cb.course_batch_registration_end as registration_end,
           cb.course_batch_start_date as start_date, cb.course_batch_end_date as end_date, 
