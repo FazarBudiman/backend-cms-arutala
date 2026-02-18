@@ -55,6 +55,20 @@ export const courseBatch = new Elysia({ prefix: '/:courseId/batch' })
     }
   )
 
+  .get(
+    '/:batchId',
+    async ({ params }) => {
+      const res = await CourseBatchController.getCourseBatchByBatchId(params)
+      return res
+    },
+    {
+      detail: {
+        tags: ['Courses'],
+        summary: '[course-batch] Get Course Batch by Course Id and Batch Id',
+      },
+    }
+  )
+
   .patch(
     '/:batchId',
     async ({ body, params, store }) => {
