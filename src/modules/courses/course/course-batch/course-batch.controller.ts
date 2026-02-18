@@ -53,6 +53,20 @@ export class CourseBatchController {
     })
   }
 
+  static async getCourseBatchByBatchId(
+    params: ParamsCourseBatchProps
+  ): Promise<ApiResponse> {
+    const { courseId, batchId } = params
+    const courseBatch = await CourseBatchService.getCourseBatchByBatchId(
+      courseId,
+      batchId
+    )
+    return ResponseHelper.success(
+      'Mengambail course batch by batch id berhasil',
+      courseBatch
+    )
+  }
+
   static async updateCourseBatchController(
     payload: Partial<CourseBatchProps>,
     params: ParamsCourseBatchProps,

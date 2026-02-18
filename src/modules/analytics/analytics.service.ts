@@ -32,7 +32,7 @@ export class AnalyticsService {
         JOIN courses c 
         ON cb.course_batch_course_id = c.course_id
         WHERE cb.course_batch_status IN ('SCHEDULED', 'OPEN', 'ON_GOING')
-        AND c.is_deleted = false
+        AND c.is_deleted = false AND cb.is_deleted = FALSE
         ORDER BY CASE cb.course_batch_status
             WHEN 'SCHEDULED' THEN 1
             WHEN 'OPEN' THEN 2

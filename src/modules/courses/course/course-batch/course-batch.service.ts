@@ -115,6 +115,67 @@ export class CourseBatchService {
     )
   }
 
+  static async getCourseBatchByBatchId(courseId: string, batchId: string) {
+    const { rows } = await supabasePool.query(
+      `SELECT 
+        cb.course_batch_id,
+        cb.course_batch_name as name,
+        cb.course_batch_poster_url as poster_url,
+        cb.course_batch_registration_start as registration_start,
+        cb.course_batch_registration_end as registration_end,
+        cb.course_batch_start_date as start_date,
+        cb.course_batch_end_date as end_date,
+        cb.course_batch_status as batch_status,
+
+        c.contributor_name as instructor_name,
+        c.contributor_id as instructor_id,
+        c.contributor_job_title as instructor_job_title,
+        c.contributor_company_name as instructor_company_name,
+        c.contributor_profile_url as instructor_profile_url,
+
+        cp.base_price,
+        cp.discount_type,
+        cp.discount_value,
+        cp.final_price,
+
+        COALESCE(
+          JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'course_session_id', cs.course_session_id,
+              'topic', cs.course_session_topic,
+              'date', cs.course_session_date,
+              'start_time', cs.course_session_start_time,
+              'end_time', cs.course_session_end_time
+            )
+          ) FILTER (WHERE cs.course_session_id IS NOT NULL),
+          '[]'
+        ) as sessions
+
+      FROM course_batches cb
+
+      JOIN contributors c 
+        ON cb.course_batch_contributor_id = c.contributor_id
+
+      JOIN course_prices cp
+        ON cb.course_batch_id = cp.course_price_course_batch_id 
+
+      LEFT JOIN course_sessions cs
+        ON cb.course_batch_id = cs.course_session_batch_id
+
+      WHERE cb.course_batch_course_id = $1 AND cb.course_batch_id = $2 AND cb.is_deleted = FALSE
+
+      GROUP BY
+        cb.course_batch_id,
+        c.contributor_id,
+        cp.base_price,
+        cp.discount_type,
+        cp.discount_value,
+        cp.final_price;`,
+      [courseId, batchId]
+    )
+    return rows
+  }
+
   static async getCourseBatchByCourseId(courseId: string) {
     const { rows } = await supabasePool.query(
       // `SELECT
@@ -144,6 +205,7 @@ export class CourseBatchService {
         cb.course_batch_status as batch_status,
 
         c.contributor_name as instructor_name,
+        c.contributor_id as instructor_id,
         c.contributor_job_title as instructor_job_title,
         c.contributor_company_name as instructor_company_name,
         c.contributor_profile_url as instructor_profile_url,
