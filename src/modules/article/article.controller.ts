@@ -6,7 +6,7 @@ import { ResponseHelper } from '../../utils/responseHelper'
 import { generateUniquePageSlug } from '../../utils/slug'
 import { PageService } from '../pages/page/page.service'
 import {
-  ArticleCoverUploadProps,
+  ArticleCoverProps,
   ArticleProps,
   ArticleUpdateProps,
   ParamsArticleProps,
@@ -18,7 +18,7 @@ export class ArticleController {
     payload: ArticleProps,
     user: AuthUser
   ): Promise<ApiResponse> {
-    const { title, coverUrl } = await ArticleService.extractArticleMeta(
+    const { title } = await ArticleService.extractArticleMeta(
       payload.contentBlocks
     )
 
@@ -39,19 +39,29 @@ export class ArticleController {
       payload,
       contentTeks,
       user.user_id,
-      title,
-      coverUrl
+      title
     )
     return ResponseHelper.created('Menambah article berhasil', articleId)
   }
 
-  static async uploadCoverArticleController(
-    payload: ArticleCoverUploadProps
+  static async addCoverArticleController(
+    payload: ArticleCoverProps,
+    params: ParamsArticleProps
   ): Promise<ApiResponse> {
-    const coverUrl = await upload(payload.cover, '/article')
-    return ResponseHelper.success('Berhasil upload cover article', {
-      cover_url: coverUrl,
-    })
+    const { articleId } = params
+    await ArticleService.verifyArticleIsExist(articleId)
+
+    const coverUrl = await upload(payload.cover_image, '/article')
+
+    const { article_title } = await ArticleService.addCoverArticle(
+      articleId,
+      coverUrl,
+      payload.cover_description
+    )
+
+    return ResponseHelper.success(
+      `Menambah cover article pada: ${article_title} berhasil`
+    )
   }
 
   static async getAllArticleController(): Promise<ApiResponse> {
@@ -87,14 +97,13 @@ export class ArticleController {
     } = {}
 
     if (payload.contentBlocks) {
-      const { title, coverUrl } = await ArticleService.extractArticleMeta(
+      const { title } = await ArticleService.extractArticleMeta(
         payload.contentBlocks
       )
       const contentText = await generateContentText(payload.contentBlocks)
 
       derivedData = {
         title,
-        coverUrl,
         contentText,
         contentBlocks: payload.contentBlocks,
       }

@@ -12,22 +12,22 @@ export class ArticleService {
         title = block.data.text
       }
 
-      if (!coverUrl && block.type === 'image') {
-        coverUrl = block.data?.file?.url
-      }
+      // if (!coverUrl && block.type === 'image') {
+      //   coverUrl = block.data?.file?.url
+      // }
 
-      if (title && coverUrl) break
+      // if (title && coverUrl) break
     }
 
     if (!title) {
       throw new Error('Artikel harus memiliki minimal 1 header sebagai judul')
     }
 
-    if (!coverUrl) {
-      throw new Error('Artikel harus memiliki minimal 1 gambar sebagai cover')
-    }
+    // if (!coverUrl) {
+    //   throw new Error('Artikel harus memiliki minimal 1 gambar sebagai cover')
+    // }
 
-    return { title, coverUrl }
+    return { title }
   }
 
   static async addArticle(
@@ -35,18 +35,15 @@ export class ArticleService {
     payload: ArticleProps,
     contentTeks: string,
     userWhoCreated: string,
-    title: string,
-    coverUrl: string
+    title: string
   ) {
     const { rows } = await supabasePool.query(
       `INSERT INTO articles (article_page_id, article_title, 
-        article_cover_url, article_content_text, 
-        article_content_blocks, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6) RETURNING article_id`,
+         article_content_text, article_content_blocks, created_by)
+        VALUES ($1, $2, $3, $4, $5) RETURNING article_id`,
       [
         pageId,
         title,
-        coverUrl,
         contentTeks,
         JSON.stringify(payload.contentBlocks),
         userWhoCreated,
@@ -55,15 +52,37 @@ export class ArticleService {
     return rows[0]
   }
 
+  static async addCoverArticle(
+    pageId: string,
+    coverImage: string,
+    coverDescription: string
+  ) {
+    const { rows } = await supabasePool.query(
+      `UPDATE articles SET article_cover_url = $1, article_cover_description = $2
+        WHERE article_id = $3 RETURNING article_title`,
+      [coverImage, coverDescription, pageId]
+    )
+    return rows[0]
+  }
+
   static async getAllArticle() {
     const { rows } = await supabasePool.query(
+      // `SELECT
+      //   article_id, article_title,
+      //   article_cover_url, article_cover_description , article_content_text,
+      //   article_status, created_date
+      // FROM articles
+      // WHERE is_deleted = FALSE
+      //   AND article_status = 'PUBLISHED'`
       `SELECT 
-        article_id, article_title, 
-        article_cover_url, article_content_text, 
-        article_status, created_date
-      FROM articles 
-      WHERE is_deleted = FALSE 
-        AND article_status = 'PUBLISHED'`
+        a.article_id, a.article_title, 
+        a.article_cover_url, a.article_content_blocks, 
+        a.article_cover_description,
+        a.article_content_text, a.article_status, 
+        a.created_date, u.full_name
+      FROM articles a  JOIN users u ON a.created_by = u.user_id
+      WHERE a.is_deleted = FALSE 
+        AND a.article_status = 'PUBLISHED'`
     )
     return rows
   }
@@ -83,6 +102,7 @@ export class ArticleService {
       `SELECT 
         a.article_id, a.article_title, 
         a.article_cover_url, a.article_content_blocks, 
+        a.article_cover_description,
         a.article_content_text, a.article_status, 
         a.created_date, u.full_name
       FROM articles a  JOIN users u ON a.created_by = u.user_id

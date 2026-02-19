@@ -2,7 +2,7 @@ import bearer from '@elysiajs/bearer'
 import Elysia from 'elysia'
 import { requireAuth } from '../../guards/auth.guard'
 import {
-  ArticleCoverUploadModel,
+  ArticleCoverModel,
   ArticleModel,
   ArticleUpdateModel,
   ParamsArticleModel,
@@ -33,17 +33,20 @@ export const article = new Elysia().group('/article', (app) =>
       }
     )
     .post(
-      '/upload',
-      async ({ body }) => {
-        const res = await ArticleController.uploadCoverArticleController(body)
+      '/:articleId/cover',
+      async ({ body, params }) => {
+        const res = await ArticleController.addCoverArticleController(
+          body,
+          params
+        )
         return res
       },
       {
         beforeHandle: requireAuth('CREATE_ARTICLE'),
-        body: ArticleCoverUploadModel,
+        body: ArticleCoverModel,
         detail: {
           tags: ['Article'],
-          summary: 'Upload cover article',
+          summary: 'Add cover for article',
         },
       }
     )

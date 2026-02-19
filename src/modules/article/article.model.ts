@@ -53,14 +53,18 @@ export const ArticleUpdateModel = t.Object({
 export type ArticleUpdateProps = Static<typeof ArticleUpdateModel>
 
 // Model Upload Poster Batch
-export const ArticleCoverUploadModel = t.Object({
-  cover: t.File({
+export const ArticleCoverModel = t.Object({
+  cover_image: t.File({
     type: ['image/jpeg', 'image/png', 'image/webp'],
     maxSize: '5m',
     error: 'Poster harus berupa JPG, PNG, atau WEBP dengan ukuran maksimal 5MB',
   }),
+  cover_description: t.String({
+    minLength: 20,
+    error: 'Judul harus merupakan string dan memiliki minimal 20 karakter',
+  }),
 })
-export type ArticleCoverUploadProps = Static<typeof ArticleCoverUploadModel>
+export type ArticleCoverProps = Static<typeof ArticleCoverModel>
 
 // Model Params Article
 export const ParamsArticleModel = t.Object({
